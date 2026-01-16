@@ -435,7 +435,7 @@ Respond with JSON only:
     }
   }
 
-  // Generate only main roads (cross pattern, no ring roads)
+  // Generate road network including grid roads through blocks
   generateMinimalRoads(offset) {
     const prevOffset = (this.currentRing - 1) * BLOCK_SIZE
     const startPos = prevOffset > 0 ? prevOffset + GRID_SIZE : 12
@@ -482,6 +482,86 @@ Respond with JSON only:
         scale: 2,
         buildingType: 'road',
       })
+    }
+
+    // Additional grid roads through the quadrants
+    const blockCenters = [
+      offset - BLOCK_SIZE / 2,
+      -(offset - BLOCK_SIZE / 2),
+    ]
+
+    // Add horizontal roads through each quadrant
+    for (const centerX of blockCenters) {
+      for (let z = -offset + 8; z <= offset - 8; z += GRID_SIZE) {
+        if (z === 0) continue // Skip main road
+        if (this.isOnRoad(centerX, z)) continue
+        this.markAsRoad(centerX, z)
+        this.buildQueue.push({
+          model: 'road_straight',
+          position: [centerX, 0, z],
+          rotation: [0, 0, 0],
+          folder: 'city',
+          scale: 2,
+          buildingType: 'road',
+        })
+      }
+    }
+
+    // Add vertical roads through each quadrant
+    for (const centerZ of blockCenters) {
+      for (let x = -offset + 8; x <= offset - 8; x += GRID_SIZE) {
+        if (x === 0) continue // Skip main road
+        if (this.isOnRoad(x, centerZ)) continue
+        this.markAsRoad(x, centerZ)
+        this.buildQueue.push({
+          model: 'road_straight',
+          position: [x, 0, centerZ],
+          rotation: [0, Math.PI / 2, 0],
+          folder: 'city',
+          scale: 2,
+          buildingType: 'road',
+        })
+      }
+    }
+
+    // Add road intersections at key points
+    this.addRoadIntersections(offset)
+  }
+
+  // Add intersections where roads meet
+  addRoadIntersections(offset) {
+    const blockCenters = [
+      offset - BLOCK_SIZE / 2,
+      -(offset - BLOCK_SIZE / 2),
+    ]
+
+    // Add junctions at main road crossings
+    for (const x of blockCenters) {
+      if (!this.worldState.isCellOccupied(x, 0)) {
+        this.buildQueue.push({
+          model: 'road_tsplit',
+          position: [x, 0, 0],
+          rotation: [0, x > 0 ? Math.PI : 0, 0],
+          folder: 'city',
+          scale: 2,
+          buildingType: 'road',
+        })
+        this.markAsRoad(x, 0)
+      }
+    }
+
+    for (const z of blockCenters) {
+      if (!this.worldState.isCellOccupied(0, z)) {
+        this.buildQueue.push({
+          model: 'road_tsplit',
+          position: [0, 0, z],
+          rotation: [0, z > 0 ? Math.PI / 2 : -Math.PI / 2, 0],
+          folder: 'city',
+          scale: 2,
+          buildingType: 'road',
+        })
+        this.markAsRoad(0, z)
+      }
     }
   }
 
@@ -540,6 +620,7 @@ Respond with JSON only:
     if (this.isBuildingInProgress || this.isThinking) return
 
     this.isThinking = true
+    let buildReason = 'Expanding the colony'
 
     try {
       // Check power status first
@@ -552,6 +633,7 @@ Respond with JSON only:
 
       // If we need power, filter queue to only power buildings OR inject solar panels
       if (needsPower) {
+        buildReason = `Power critical (${netPower.toFixed(1)} net) - need more energy!`
         // Find a power building in queue or add one
         const powerIndex = this.buildQueue.findIndex(item => item.buildingType === 'power')
 
@@ -567,11 +649,13 @@ Respond with JSON only:
               folder: 'space',
               scale: 2,
               buildingType: 'power',
+              reason: buildReason,
             })
           }
         } else if (powerIndex > 0) {
           // Move power building to front of queue
           const powerItem = this.buildQueue.splice(powerIndex, 1)[0]
+          powerItem.reason = buildReason
           this.buildQueue.unshift(powerItem)
         }
       }
@@ -599,8 +683,11 @@ Respond with JSON only:
           continue
         }
 
+        // Determine reason for building
+        const reason = item.reason || this.getReasonForBuildingType(item.buildingType)
+
         this.isThinking = false
-        this.startBuild(item)
+        this.startBuild(item, reason)
         return
       }
 
@@ -610,6 +697,22 @@ Respond with JSON only:
       console.error('Build error:', error)
       this.isThinking = false
     }
+  }
+
+  // Get a reason string for a building type
+  getReasonForBuildingType(type) {
+    const reasons = {
+      residential: 'Colonists need housing',
+      commercial: 'Creating jobs and services',
+      industrial: 'Building manufacturing capacity',
+      power: 'Colony needs more energy',
+      water: 'Expanding water storage',
+      food: 'Growing more food for colonists',
+      eco: 'Improving life support systems',
+      park: 'Adding greenery for morale',
+      road: 'Connecting the city blocks',
+    }
+    return reasons[type] || 'Expanding the colony'
   }
 
   // Find a valid position for emergency solar panel
@@ -645,12 +748,12 @@ Respond with JSON only:
     return null
   }
 
-  startBuild(item) {
+  startBuild(item, reason = 'Expanding the colony') {
     this.isBuildingInProgress = true
 
     const metadata = this.generateBuildingMetadata(item.model, item.position, item.buildingType)
 
-    console.log(`Building ${metadata.name} (${item.model}) at [${item.position}]`)
+    console.log(`Building ${metadata.name} (${item.model}) at [${item.position}] - ${reason}`)
 
     const buildData = {
       model: item.model,
@@ -660,6 +763,19 @@ Respond with JSON only:
       folder: item.folder || 'city',
       metadata,
     }
+
+    // Emit log entry for the logbook
+    this.emitAction({
+      type: 'LOG_ENTRY',
+      data: {
+        action: 'BUILD',
+        model: item.model,
+        position: item.position,
+        reason: reason,
+        buildingType: item.buildingType,
+        name: metadata.name,
+      }
+    })
 
     this.emitAction({
       type: 'BUILD',

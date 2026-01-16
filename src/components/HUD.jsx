@@ -120,13 +120,13 @@ function ResourceBar({ label, value, max, color, showNet = false }) {
   )
 }
 
-// Weather icon helper
-const getWeatherIcon = (weather) => {
-  switch (weather) {
-    case 'rain': return { icon: '~', label: 'Rainy' }
-    case 'snow': return { icon: '*', label: 'Snowy' }
-    default: return { icon: 'o', label: 'Clear' }
-  }
+// Format game time for logbook
+const formatGameTime = (time, day) => {
+  const hours = Math.floor(time)
+  const minutes = Math.floor((time % 1) * 60)
+  const period = hours >= 12 ? 'PM' : 'AM'
+  const displayHours = hours % 12 || 12
+  return `Day ${day}, ${displayHours}:${minutes.toString().padStart(2, '0')} ${period}`
 }
 
 function HUD() {
@@ -134,7 +134,6 @@ function HUD() {
   const energy = useGameStore((state) => state.energy)
   const timeOfDay = useGameStore((state) => state.timeOfDay)
   const day = useGameStore((state) => state.day)
-  const weather = useGameStore((state) => state.weather)
   const buildingsToday = useGameStore((state) => state.buildingsToday)
   const buildingsPerDay = useGameStore((state) => state.buildingsPerDay)
   const adminMode = useGameStore((state) => state.adminMode)
@@ -147,9 +146,9 @@ function HUD() {
   const currentBuildTask = useGameStore((state) => state.currentBuildTask)
   const isBuilding = useGameStore((state) => state.isBuilding)
   const resetWorld = useGameStore((state) => state.resetWorld)
+  const logbook = useGameStore((state) => state.logbook)
 
   const moodInfo = getMoodEmoji(mood)
-  const weatherInfo = getWeatherIcon(weather)
 
   // Calculate resources from buildings
   const resources = useMemo(() => {
@@ -229,25 +228,12 @@ function HUD() {
           }}>
             Day {day}
           </span>
-          <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '6px',
+          <span style={{
+            fontSize: '10px',
+            color: 'rgba(255, 255, 255, 0.4)',
           }}>
-            <span style={{
-              fontSize: '14px',
-              color: weather === 'rain' ? '#61afef' : weather === 'snow' ? '#c8ccd4' : '#f0c674',
-            }}>
-              {weatherInfo.icon}
-            </span>
-            <span style={{
-              fontSize: '10px',
-              color: 'rgba(255, 255, 255, 0.5)',
-              textTransform: 'uppercase',
-            }}>
-              {weatherInfo.label}
-            </span>
-          </div>
+            Colony Est.
+          </span>
         </div>
 
         {/* Time */}
@@ -582,6 +568,88 @@ function HUD() {
           </span>
         </div>
       )}
+
+      {/* Claude's Logbook - positioned on right side */}
+      <div style={{
+        position: 'fixed',
+        top: '16px',
+        right: '16px',
+        left: 'auto',
+        ...panelStyle,
+        maxHeight: '400px',
+        width: '280px',
+        display: 'flex',
+        flexDirection: 'column',
+      }}>
+        <div style={{
+          ...labelStyle,
+          marginBottom: '8px',
+          paddingBottom: '6px',
+          borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+        }}>
+          <span>Claude's Logbook</span>
+          <span style={{ fontSize: '9px', color: 'rgba(255, 255, 255, 0.3)' }}>
+            {logbook.length} entries
+          </span>
+        </div>
+
+        <div style={{
+          flex: 1,
+          overflowY: 'auto',
+          maxHeight: '340px',
+        }}>
+          {logbook.length === 0 ? (
+            <div style={{
+              fontSize: '10px',
+              color: 'rgba(255, 255, 255, 0.3)',
+              fontStyle: 'italic',
+              textAlign: 'center',
+              padding: '20px 0',
+            }}>
+              No entries yet...
+            </div>
+          ) : (
+            [...logbook].reverse().map((entry) => (
+              <div
+                key={entry.id}
+                style={{
+                  marginBottom: '8px',
+                  paddingBottom: '8px',
+                  borderBottom: '1px solid rgba(255, 255, 255, 0.05)',
+                }}
+              >
+                <div style={{
+                  fontSize: '9px',
+                  color: 'rgba(255, 255, 255, 0.3)',
+                  marginBottom: '2px',
+                }}>
+                  {formatGameTime(entry.gameTime, entry.day)}
+                </div>
+                <div style={{
+                  fontSize: '11px',
+                  color: entry.action === 'BUILD' ? '#7dd3a0' : '#7dd3fc',
+                  fontWeight: '500',
+                }}>
+                  {entry.action === 'BUILD' ? 'Built' : entry.action}: {entry.model?.replace(/_/g, ' ') || 'Unknown'}
+                </div>
+                {entry.reason && (
+                  <div style={{
+                    fontSize: '9px',
+                    color: 'rgba(255, 255, 255, 0.5)',
+                    fontStyle: 'italic',
+                    marginTop: '2px',
+                  }}>
+                    "{entry.reason}"
+                  </div>
+                )}
+              </div>
+            ))
+          )}
+        </div>
+      </div>
     </div>
   )
 }

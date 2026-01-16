@@ -15,14 +15,15 @@ export const useGameStore = create((set, get) => ({
     right: false
   },
 
-  // Weather and time system
-  weather: 'clear', // 'clear', 'rain', 'snow'
+  // Time system
   timeOfDay: 6, // 0-24 hours (start at dawn)
   autoTimeEnabled: true, // auto-advance time (enabled by default)
   day: 1, // Current day number
   buildingsToday: 0, // Buildings built today
   buildingsPerDay: [], // History: [{ day: 1, count: 5 }, ...]
-  lastWeatherChangeHour: 6, // Hour when weather last changed
+
+  // Claude's logbook - records AI decisions with timestamps
+  logbook: [], // [{ id, timestamp, gameTime, day, action, reason, model, position }]
 
   // Claude's stats
   mood: 80, // 0-100 (happy to sad)
@@ -103,13 +104,12 @@ export const useGameStore = create((set, get) => ({
   },
   cancelBuild: () => set({ currentBuildTask: null, isBuilding: false }),
 
-  // Weather and time actions
-  setWeather: (weather) => set({ weather }),
+  // Time actions
   setTimeOfDay: (time) => set({ timeOfDay: time % 24 }),
   setDay: (day) => set({ day }),
   toggleAutoTime: () => set((state) => ({ autoTimeEnabled: !state.autoTimeEnabled })),
 
-  // Advance time with day tracking and weather changes
+  // Advance time with day tracking
   advanceTime: (delta) => set((state) => {
     const newTime = state.timeOfDay + delta
     const newState = { timeOfDay: newTime % 24 }
@@ -125,26 +125,25 @@ export const useGameStore = create((set, get) => ({
       console.log(`Day ${newDay} begins! Yesterday: ${state.buildingsToday} buildings`)
     }
 
-    // Weather changes every ~6 game hours
-    const currentHour = newTime % 24
-    const hoursSinceWeatherChange = currentHour - state.lastWeatherChangeHour
-    const normalizedHours = hoursSinceWeatherChange < 0 ? hoursSinceWeatherChange + 24 : hoursSinceWeatherChange
-
-    // Only change weather after 6+ hours have passed
-    if (normalizedHours >= 6) {
-      // 70% clear, 15% rain, 15% snow - favoring nice weather
-      const roll = Math.random()
-      let newWeather
-      if (roll < 0.70) newWeather = 'clear'
-      else if (roll < 0.85) newWeather = 'rain'
-      else newWeather = 'snow'
-
-      newState.weather = newWeather
-      newState.lastWeatherChangeHour = Math.floor(currentHour)
-    }
-
     return newState
   }),
+
+  // Add entry to Claude's logbook
+  addLogEntry: (entry) => set((state) => {
+    const logEntry = {
+      id: Date.now(),
+      timestamp: new Date().toISOString(),
+      gameTime: state.timeOfDay,
+      day: state.day,
+      ...entry,
+    }
+    // Keep only last 50 entries to prevent memory issues
+    const newLogbook = [...state.logbook, logEntry].slice(-50)
+    return { logbook: newLogbook }
+  }),
+
+  // Clear logbook
+  clearLogbook: () => set({ logbook: [] }),
 
   // Track building completion for daily stats
   incrementBuildingsToday: () => set((state) => ({
@@ -179,7 +178,6 @@ export const useGameStore = create((set, get) => ({
       characterPosition: serverState.characterPosition || [0, 0, 0],
       characterRotation: serverState.characterRotation || 0,
       timeOfDay: serverState.timeOfDay || 6,
-      weather: serverState.weather || 'clear',
       mood: serverState.mood || 80,
       energy: serverState.energy || 100,
       // Reset day tracking if this is a world reset
@@ -187,7 +185,7 @@ export const useGameStore = create((set, get) => ({
         day: 1,
         buildingsToday: 0,
         buildingsPerDay: [],
-        lastWeatherChangeHour: 6,
+        logbook: [],
       } : {}),
     }
   }),
@@ -199,14 +197,13 @@ export const useGameStore = create((set, get) => ({
     buildingsToday: 0,
     buildingsPerDay: [],
     timeOfDay: 6,
-    weather: 'clear',
-    lastWeatherChangeHour: 6,
     mood: 80,
     energy: 100,
     aiStatus: 'Building...',
     aiCurrentAction: null,
     currentBuildTask: null,
     isBuilding: false,
+    logbook: [],
   }),
 
   // Buildings placed by AI (legacy)
