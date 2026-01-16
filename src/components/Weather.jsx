@@ -3,21 +3,25 @@ import { useFrame } from '@react-three/fiber'
 import * as THREE from 'three'
 import { useGameStore } from '../store/gameStore'
 
+// Weather area size - large enough to cover the entire city
+const WEATHER_SIZE = 500
+const WEATHER_HEIGHT = 50
+
 // Rain particle system
 function Rain() {
   const particlesRef = useRef()
-  const particleCount = 2000
+  const particleCount = 15000 // More particles for larger area
 
   const { positions, velocities } = useMemo(() => {
     const positions = new Float32Array(particleCount * 3)
     const velocities = new Float32Array(particleCount)
 
     for (let i = 0; i < particleCount; i++) {
-      // Spread particles across a 60x60 area centered on origin
-      positions[i * 3] = (Math.random() - 0.5) * 60
-      positions[i * 3 + 1] = Math.random() * 30 // Height 0-30
-      positions[i * 3 + 2] = (Math.random() - 0.5) * 60
-      velocities[i] = 0.3 + Math.random() * 0.2 // Fall speed variation
+      // Spread particles across entire weather area
+      positions[i * 3] = (Math.random() - 0.5) * WEATHER_SIZE
+      positions[i * 3 + 1] = Math.random() * WEATHER_HEIGHT
+      positions[i * 3 + 2] = (Math.random() - 0.5) * WEATHER_SIZE
+      velocities[i] = 0.4 + Math.random() * 0.3 // Fall speed variation
     }
 
     return { positions, velocities }
@@ -34,9 +38,9 @@ function Rain() {
 
       // Reset to top when hitting ground
       if (posArray[i * 3 + 1] < 0) {
-        posArray[i * 3 + 1] = 30
-        posArray[i * 3] = (Math.random() - 0.5) * 60
-        posArray[i * 3 + 2] = (Math.random() - 0.5) * 60
+        posArray[i * 3 + 1] = WEATHER_HEIGHT
+        posArray[i * 3] = (Math.random() - 0.5) * WEATHER_SIZE
+        posArray[i * 3 + 2] = (Math.random() - 0.5) * WEATHER_SIZE
       }
     }
 
@@ -55,7 +59,7 @@ function Rain() {
       </bufferGeometry>
       <pointsMaterial
         color="#8ec8e8"
-        size={0.08}
+        size={0.12}
         transparent
         opacity={0.6}
         sizeAttenuation
@@ -67,7 +71,7 @@ function Rain() {
 // Snow particle system
 function Snow() {
   const particlesRef = useRef()
-  const particleCount = 1500
+  const particleCount = 10000 // More particles for larger area
 
   const { positions, velocities, wobble } = useMemo(() => {
     const positions = new Float32Array(particleCount * 3)
@@ -75,10 +79,10 @@ function Snow() {
     const wobble = new Float32Array(particleCount * 2) // x and z wobble phase
 
     for (let i = 0; i < particleCount; i++) {
-      positions[i * 3] = (Math.random() - 0.5) * 60
-      positions[i * 3 + 1] = Math.random() * 25
-      positions[i * 3 + 2] = (Math.random() - 0.5) * 60
-      velocities[i] = 0.02 + Math.random() * 0.03 // Slow fall
+      positions[i * 3] = (Math.random() - 0.5) * WEATHER_SIZE
+      positions[i * 3 + 1] = Math.random() * WEATHER_HEIGHT
+      positions[i * 3 + 2] = (Math.random() - 0.5) * WEATHER_SIZE
+      velocities[i] = 0.03 + Math.random() * 0.04 // Slow fall
       wobble[i * 2] = Math.random() * Math.PI * 2 // x phase
       wobble[i * 2 + 1] = Math.random() * Math.PI * 2 // z phase
     }
@@ -97,14 +101,14 @@ function Snow() {
     for (let i = 0; i < particleCount; i++) {
       // Move snow down with gentle wobble
       posArray[i * 3 + 1] -= velocities[i]
-      posArray[i * 3] += Math.sin(timeRef.current * 2 + wobble[i * 2]) * 0.005
-      posArray[i * 3 + 2] += Math.cos(timeRef.current * 2 + wobble[i * 2 + 1]) * 0.005
+      posArray[i * 3] += Math.sin(timeRef.current * 2 + wobble[i * 2]) * 0.008
+      posArray[i * 3 + 2] += Math.cos(timeRef.current * 2 + wobble[i * 2 + 1]) * 0.008
 
       // Reset to top when hitting ground
       if (posArray[i * 3 + 1] < 0) {
-        posArray[i * 3 + 1] = 25
-        posArray[i * 3] = (Math.random() - 0.5) * 60
-        posArray[i * 3 + 2] = (Math.random() - 0.5) * 60
+        posArray[i * 3 + 1] = WEATHER_HEIGHT
+        posArray[i * 3] = (Math.random() - 0.5) * WEATHER_SIZE
+        posArray[i * 3 + 2] = (Math.random() - 0.5) * WEATHER_SIZE
       }
     }
 
@@ -123,7 +127,7 @@ function Snow() {
       </bufferGeometry>
       <pointsMaterial
         color="#ffffff"
-        size={0.15}
+        size={0.2}
         transparent
         opacity={0.9}
         sizeAttenuation

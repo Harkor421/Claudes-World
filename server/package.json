@@ -1,0 +1,18 @@
+{
+  "name": "claudes-world-server",
+  "version": "1.0.0",
+  "description": "AI brain backend for Claude's World",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "node --watch index.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "ws": "^8.16.0",
+    "cors": "^2.8.5",
+    "openai": "^4.28.0",
+    "dotenv": "^16.4.0"
+  }
+}

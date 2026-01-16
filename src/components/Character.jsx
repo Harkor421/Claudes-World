@@ -4,6 +4,7 @@ import { useGLTF, useAnimations, Html } from '@react-three/drei'
 import * as THREE from 'three'
 import { SkeletonUtils } from 'three-stdlib'
 import { useGameStore } from '../store/gameStore'
+import { gameSocket } from '../services/socket'
 
 // Build duration in seconds
 const BUILD_DURATION = 5
@@ -108,24 +109,143 @@ const createFootstepSound = () => {
 
 let playHitSound = null
 let playFootstepSound = null
+let playSnoreSound = null
+
+// Create snoring sound
+const createSnoreSound = () => {
+  return () => {
+    const ctx = getAudioContext()
+    const now = ctx.currentTime
+
+    // Snore in - low rumble that rises
+    const snoreIn = ctx.createOscillator()
+    const snoreInGain = ctx.createGain()
+    snoreIn.type = 'sawtooth'
+    snoreIn.frequency.setValueAtTime(60, now)
+    snoreIn.frequency.linearRampToValueAtTime(120, now + 0.8)
+    snoreInGain.gain.setValueAtTime(0, now)
+    snoreInGain.gain.linearRampToValueAtTime(0.08, now + 0.2)
+    snoreInGain.gain.linearRampToValueAtTime(0.05, now + 0.6)
+    snoreInGain.gain.linearRampToValueAtTime(0, now + 0.8)
+
+    // Add some noise for texture
+    const bufferSize = ctx.sampleRate * 0.8
+    const noiseBuffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate)
+    const output = noiseBuffer.getChannelData(0)
+    for (let i = 0; i < bufferSize; i++) {
+      output[i] = Math.random() * 2 - 1
+    }
+    const noise = ctx.createBufferSource()
+    noise.buffer = noiseBuffer
+    const noiseFilter = ctx.createBiquadFilter()
+    noiseFilter.type = 'lowpass'
+    noiseFilter.frequency.setValueAtTime(200, now)
+    const noiseGain = ctx.createGain()
+    noiseGain.gain.setValueAtTime(0.02, now)
+    noiseGain.gain.linearRampToValueAtTime(0, now + 0.8)
+
+    // Connect
+    snoreIn.connect(snoreInGain)
+    snoreInGain.connect(ctx.destination)
+    noise.connect(noiseFilter)
+    noiseFilter.connect(noiseGain)
+    noiseGain.connect(ctx.destination)
+
+    // Start
+    snoreIn.start(now)
+    snoreIn.stop(now + 0.8)
+    noise.start(now)
+    noise.stop(now + 0.8)
+  }
+}
 
 // Main character with loaded GLB model and animations
+// ZZZ sleep particles component
+function SleepParticles({ visible }) {
+  const particlesRef = useRef([])
+  const [particles, setParticles] = React.useState([])
+
+  useEffect(() => {
+    if (visible) {
+      // Create initial particles
+      setParticles([
+        { id: 0, offset: 0 },
+        { id: 1, offset: 0.33 },
+        { id: 2, offset: 0.66 },
+      ])
+    } else {
+      setParticles([])
+    }
+  }, [visible])
+
+  useFrame((state) => {
+    if (!visible) return
+    const time = state.clock.elapsedTime
+    particlesRef.current.forEach((ref, i) => {
+      if (ref) {
+        const offset = particles[i]?.offset || 0
+        const t = ((time + offset * 3) % 3) / 3 // 3 second cycle per Z
+        ref.position.y = 1 + t * 1.5
+        ref.position.x = Math.sin(t * Math.PI) * 0.3
+        ref.scale.setScalar(0.3 + t * 0.4)
+        ref.material.opacity = Math.sin(t * Math.PI) * 0.8
+      }
+    })
+  })
+
+  if (!visible) return null
+
+  return (
+    <group position={[0.3, 0, 0]}>
+      {particles.map((p, i) => (
+        <mesh key={p.id} ref={el => particlesRef.current[i] = el}>
+          <planeGeometry args={[0.5, 0.5]} />
+          <meshBasicMaterial color="#7dd3fc" transparent opacity={0.8} side={THREE.DoubleSide} />
+        </mesh>
+      ))}
+      {/* Z text as simple planes */}
+      {particles.map((p, i) => {
+        const t = i * 0.33
+        return (
+          <Html key={`z-${p.id}`} position={[Math.sin(t * Math.PI) * 0.3, 1 + t * 1.5, 0]} center>
+            <div style={{
+              color: '#7dd3fc',
+              fontSize: `${14 + i * 4}px`,
+              fontWeight: 'bold',
+              fontFamily: 'monospace',
+              textShadow: '0 0 4px rgba(125, 211, 252, 0.5)',
+              opacity: 0.9 - i * 0.2,
+            }}>
+              Z
+            </div>
+          </Html>
+        )
+      })}
+    </group>
+  )
+}
+
 function LoadedCharacter() {
   const groupRef = useRef()
   const modelRef = useRef()
   const currentActionRef = useRef(null)
   const wasMovingRef = useRef(false)
   const wasBuildingRef = useRef(false)
+  const wasSleepingRef = useRef(false)
   const buildStartTimeRef = useRef(null)
   const lastHitSoundRef = useRef(0)
   const lastFootstepRef = useRef(0)
+  const lastSnoreSoundRef = useRef(0)
+  const lastPositionSyncRef = useRef(0)
 
   const characterPosition = useGameStore((state) => state.characterPosition)
   const setCharacterPosition = useGameStore((state) => state.setCharacterPosition)
+  const setCharacterRotation = useGameStore((state) => state.setCharacterRotation)
   const targetPosition = useGameStore((state) => state.characterTargetPosition)
   const clearTargetPosition = useGameStore((state) => state.clearTargetPosition)
-  const keysPressed = useGameStore((state) => state.keysPressed)
   const setIsMoving = useGameStore((state) => state.setIsMoving)
+  const isSleeping = useGameStore((state) => state.isSleeping)
+  const setIsSleeping = useGameStore((state) => state.setIsSleeping)
 
   // Building state
   const currentBuildTask = useGameStore((state) => state.currentBuildTask)
@@ -145,6 +265,9 @@ function LoadedCharacter() {
       }
       if (!playFootstepSound) {
         playFootstepSound = createFootstepSound()
+      }
+      if (!playSnoreSound) {
+        playSnoreSound = createSnoreSound()
       }
       window.removeEventListener('click', initSound)
     }
@@ -208,24 +331,8 @@ function LoadedCharacter() {
     const hasBuildTask = currentBuildTask && !isBuilding
     const buildTarget = currentBuildTask ? new THREE.Vector3(...currentBuildTask.position) : null
 
-    const moveDir = new THREE.Vector3()
-    const forwardDir = new THREE.Vector3(-1, 0, -1).normalize()
-    const rightDir = new THREE.Vector3(1, 0, -1).normalize()
-
-    // Don't allow keyboard movement while building
-    if (!isBuilding) {
-      if (keysPressed.forward) { moveDir.add(forwardDir); moving = true }
-      if (keysPressed.backward) { moveDir.sub(forwardDir); moving = true }
-      if (keysPressed.left) { moveDir.sub(rightDir); moving = true }
-      if (keysPressed.right) { moveDir.add(rightDir); moving = true }
-    }
-
-    if (moving && moveDir.length() > 0) {
-      moveDir.normalize()
-      currentPos.add(moveDir.multiplyScalar(moveSpeed))
-      targetDir = moveDir.clone()
-      clearTargetPosition()
-    } else if (targetPosition && !isBuilding) {
+    // AI controls movement via targetPosition
+    if (targetPosition && !isBuilding) {
       const target = new THREE.Vector3(...targetPosition)
       const direction = target.clone().sub(currentPos)
       const distance = direction.length()
@@ -236,15 +343,18 @@ function LoadedCharacter() {
         targetDir = direction.clone()
         moving = true
       } else {
+        // Arrived at target position
         clearTargetPosition()
-        // Check if we arrived at build location
-        if (hasBuildTask && buildTarget) {
-          const distToBuild = currentPos.distanceTo(buildTarget)
-          if (distToBuild < 0.5) {
-            setIsBuilding(true)
-            buildStartTimeRef.current = Date.now()
-          }
-        }
+      }
+    }
+
+    // Check if we should start building (arrived near build location)
+    if (hasBuildTask && buildTarget && !moving) {
+      const distToBuild = currentPos.distanceTo(buildTarget)
+      if (distToBuild < 1.5) {
+        setIsBuilding(true)
+        buildStartTimeRef.current = Date.now()
+        console.log('Starting build task:', currentBuildTask.model)
       }
     }
 
@@ -282,13 +392,51 @@ function LoadedCharacter() {
 
       // Complete building
       if (progress >= 1) {
+        // Notify server that build is complete BEFORE clearing the task
+        const building = {
+          id: Date.now(),
+          model: currentBuildTask.model,
+          position: currentBuildTask.position,
+          rotation: [0, 0, 0],
+          scale: currentBuildTask.scale || 2,
+          folder: currentBuildTask.folder || 'city'
+        }
+        gameSocket.notifyActionComplete('BUILD_COMPLETE', { building })
+
         completeBuild()
         buildStartTimeRef.current = null
       }
     }
 
+    // Handle sleeping - play snoring sounds
+    if (isSleeping && !moving && playSnoreSound) {
+      const now = Date.now()
+      const snoreInterval = 2000 // Snore every 2 seconds
+      if (now - lastSnoreSoundRef.current > snoreInterval) {
+        playSnoreSound()
+        lastSnoreSoundRef.current = now
+      }
+    }
+
+    // Wake up when moving
+    if (moving && isSleeping) {
+      setIsSleeping(false)
+    }
+
     setCharacterPosition([currentPos.x, currentPos.y, currentPos.z])
+    setCharacterRotation(groupRef.current.rotation.y)
     groupRef.current.position.set(currentPos.x, currentPos.y, currentPos.z)
+
+    // Sync position to server periodically (every 100ms)
+    const now = Date.now()
+    if (now - lastPositionSyncRef.current > 100) {
+      gameSocket.updateCharacterPosition(
+        [currentPos.x, currentPos.y, currentPos.z],
+        groupRef.current.rotation.y,
+        moving
+      )
+      lastPositionSyncRef.current = now
+    }
 
     // Smooth rotation (only when moving, not building)
     if (moving && targetDir.length() > 0 && !isBuilding) {
@@ -364,6 +512,9 @@ function LoadedCharacter() {
       <group ref={modelRef} scale={1}>
         <primitive object={clonedScene} />
       </group>
+
+      {/* Sleep ZZZ particles */}
+      <SleepParticles visible={isSleeping} />
     </group>
   )
 }

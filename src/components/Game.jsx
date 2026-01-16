@@ -1,34 +1,63 @@
-import React, { useEffect } from 'react'
+import React from 'react'
 import { OrbitControls } from '@react-three/drei'
 import { useFrame } from '@react-three/fiber'
 import Ground from './Ground'
 import Character from './Character'
 import DayNightCycle from './DayNightCycle'
-import Weather from './Weather'
 import SpaceObject from './SpaceObject'
+import CityObject from './CityObject'
 import BuildProgress from './BuildProgress'
 import GridPreview from './GridPreview'
+import { InteractiveBuilding } from './BuildingInteraction'
+import VoxelEffectsManager from './VoxelParticles'
+import VoxelClouds from './VoxelClouds'
 import { useGameStore } from '../store/gameStore'
 
-// Grid size for snapping (matches building scale of 2)
-const GRID_SIZE = 2
-
-// Snap position to grid center
-const snapToGrid = (pos) => [
-  Math.round(pos[0] / GRID_SIZE) * GRID_SIZE,
-  0,
-  Math.round(pos[2] / GRID_SIZE) * GRID_SIZE
+// Space models - used to detect folder when not specified
+const SPACE_MODELS = [
+  'basemodule_A', 'basemodule_B', 'basemodule_C', 'basemodule_D', 'basemodule_E',
+  'basemodule_garage', 'dome', 'eco_module', 'water_storage',
+  'roofmodule_base', 'roofmodule_cargo_A', 'roofmodule_cargo_B', 'roofmodule_cargo_C',
+  'roofmodule_solarpanels',
+  'cargo_A', 'cargo_A_packed', 'cargo_A_stacked',
+  'cargo_B', 'cargo_B_packed', 'cargo_B_stacked',
+  'containers_A', 'containers_B', 'containers_C', 'containers_D',
+  'cargodepot_A', 'cargodepot_B', 'cargodepot_C',
+  'dropship', 'dropship_packed', 'lander_A', 'lander_B', 'lander_base',
+  'spacetruck', 'spacetruck_large', 'spacetruck_trailer',
+  'mobile_base_cargo', 'mobile_base_carriage', 'mobile_base_command', 'mobile_base_frame',
+  'landingpad_large', 'landingpad_small',
+  'structure_low', 'structure_tall', 'drill_structure',
+  'space_farm_large', 'space_farm_large_sprinkler', 'space_farm_small',
+  'solarpanel', 'lights',
+  'terrain_low', 'terrain_low_curved', 'terrain_mining',
+  'terrain_slope', 'terrain_slope_inner_corner', 'terrain_slope_outer_corner',
+  'terrain_tall', 'terrain_tall_curved',
+  'tunnel_diagonal_long_A', 'tunnel_diagonal_long_B',
+  'tunnel_diagonal_short_A', 'tunnel_diagonal_short_B',
+  'tunnel_straight_A', 'tunnel_straight_B',
+  'rock_A', 'rock_B', 'rocks_A', 'rocks_B'
 ]
 
-// Component to handle auto time advancement
+// Determine which folder a model belongs to
+const getModelFolder = (building) => {
+  if (SPACE_MODELS.includes(building.model)) return 'space'
+  return building.folder || 'city'
+}
+
+// Component to handle auto time advancement (synced with AI speed)
 function TimeAdvancer() {
   const autoTimeEnabled = useGameStore((state) => state.autoTimeEnabled)
   const advanceTime = useGameStore((state) => state.advanceTime)
+  const aiSpeed = useGameStore((state) => state.aiSpeed)
 
   useFrame((state, delta) => {
     if (autoTimeEnabled) {
-      // Advance 1 hour per 10 real seconds
-      advanceTime(delta * 0.1)
+      // Base: 1 real second = 30 game minutes (0.5 hours)
+      // So 1 full day (24 hours) = 48 real seconds at 1x speed
+      // At 10x speed: 1 full day = 4.8 real seconds
+      const hoursPerSecond = 0.5 * aiSpeed // 0.5 hours per second * speed multiplier
+      advanceTime(delta * hoursPerSecond)
     }
   })
 
@@ -36,88 +65,16 @@ function TimeAdvancer() {
 }
 
 function Game() {
-  const setKeyPressed = useGameStore((state) => state.setKeyPressed)
-  const setCharacterTargetPosition = useGameStore((state) => state.setCharacterTargetPosition)
-  const openBuildMenu = useGameStore((state) => state.openBuildMenu)
   const placedBuildings = useGameStore((state) => state.placedBuildings)
-
-  // Keyboard controls
-  useEffect(() => {
-    const handleKeyDown = (e) => {
-      switch (e.code) {
-        case 'KeyW':
-        case 'ArrowUp':
-          setKeyPressed('forward', true)
-          break
-        case 'KeyS':
-        case 'ArrowDown':
-          setKeyPressed('backward', true)
-          break
-        case 'KeyA':
-        case 'ArrowLeft':
-          setKeyPressed('left', true)
-          break
-        case 'KeyD':
-        case 'ArrowRight':
-          setKeyPressed('right', true)
-          break
-      }
-    }
-
-    const handleKeyUp = (e) => {
-      switch (e.code) {
-        case 'KeyW':
-        case 'ArrowUp':
-          setKeyPressed('forward', false)
-          break
-        case 'KeyS':
-        case 'ArrowDown':
-          setKeyPressed('backward', false)
-          break
-        case 'KeyA':
-        case 'ArrowLeft':
-          setKeyPressed('left', false)
-          break
-        case 'KeyD':
-        case 'ArrowRight':
-          setKeyPressed('right', false)
-          break
-      }
-    }
-
-    window.addEventListener('keydown', handleKeyDown)
-    window.addEventListener('keyup', handleKeyUp)
-
-    return () => {
-      window.removeEventListener('keydown', handleKeyDown)
-      window.removeEventListener('keyup', handleKeyUp)
-    }
-  }, [setKeyPressed])
-
-  // Left click to move
-  const handleGroundClick = (e) => {
-    if (e.button !== 0) return // Only left click
-    e.stopPropagation()
-    const point = e.point
-    setCharacterTargetPosition([point.x, 0, point.z])
-  }
-
-  // Right click to open build menu
-  const handleGroundRightClick = (e) => {
-    e.stopPropagation()
-    const point = e.point
-    // Snap to grid
-    const snappedPos = snapToGrid([point.x, 0, point.z])
-    // Get screen coordinates for menu position
-    const screenPos = { x: e.clientX || e.nativeEvent?.clientX || window.innerWidth / 2, y: e.clientY || e.nativeEvent?.clientY || window.innerHeight / 2 }
-    openBuildMenu(snappedPos, screenPos)
-  }
 
   return (
     <>
       <DayNightCycle />
-      <Weather />
+      <VoxelClouds />
       <TimeAdvancer />
+
+      {/* Voxel particle effects */}
+      <VoxelEffectsManager />
 
       {/* Isometric-style camera controls */}
       <OrbitControls
@@ -127,25 +84,22 @@ function Game() {
         minPolarAngle={Math.PI / 6}
         maxPolarAngle={Math.PI / 3}
         minDistance={8}
-        maxDistance={60}
+        maxDistance={500}
       />
 
-      {/* Ground plane - clickable for movement, right-click for build */}
-      <Ground onClick={handleGroundClick} onContextMenu={handleGroundRightClick} />
+      {/* Ground plane */}
+      <Ground />
 
       {/* The Claude character */}
       <Character />
 
       {/* === CRASHED SHIP - CHARACTER SPAWN/REST AREA === */}
-      {/* Main crashed dropship - tilted as if it crashed */}
       <SpaceObject
         model="dropship"
         position={[0, 0.2, 0]}
         rotation={[0.1, 0.3, 0.08]}
         scale={2}
       />
-
-      {/* Small debris right next to the ship */}
       <SpaceObject model="cargo_A" position={[-2.5, 0, 1.5]} rotation={[0.05, 0.6, 0]} scale={2} />
       <SpaceObject model="cargo_B" position={[2.5, 0, 1]} rotation={[0, -0.4, 0.05]} scale={2} />
 
@@ -155,33 +109,38 @@ function Game() {
       {/* Building in progress */}
       <BuildProgress />
 
-      {/* Player-placed buildings */}
-      {placedBuildings.map((building) => (
-        <SpaceObject
-          key={building.id}
-          model={building.model}
-          position={building.position}
-          rotation={building.rotation}
-          scale={building.scale}
-        />
-      ))}
-    </>
-  )
-}
+      {/* Player-placed buildings with interaction */}
+      {placedBuildings.map((building) => {
+        const folder = getModelFolder(building)
+        const ObjectComponent = folder === 'space' ? SpaceObject : CityObject
 
-// Simple rock decoration
-function Rock({ position }) {
-  return (
-    <group position={position}>
-      <mesh castShadow receiveShadow position={[0, 0.15, 0]}>
-        <dodecahedronGeometry args={[0.4, 0]} />
-        <meshStandardMaterial color="#4a5568" roughness={0.9} />
-      </mesh>
-      <mesh castShadow receiveShadow position={[0.3, 0.1, 0.2]}>
-        <dodecahedronGeometry args={[0.25, 0]} />
-        <meshStandardMaterial color="#3d4452" roughness={0.9} />
-      </mesh>
-    </group>
+        // Only wrap non-road buildings with interaction
+        const isInteractive = building.metadata && building.metadata.buildingType !== 'road'
+
+        if (isInteractive) {
+          return (
+            <InteractiveBuilding key={building.id} building={building}>
+              <ObjectComponent
+                model={building.model}
+                position={building.position}
+                rotation={building.rotation}
+                scale={building.scale}
+              />
+            </InteractiveBuilding>
+          )
+        }
+
+        return (
+          <ObjectComponent
+            key={building.id}
+            model={building.model}
+            position={building.position}
+            rotation={building.rotation}
+            scale={building.scale}
+          />
+        )
+      })}
+    </>
   )
 }
 

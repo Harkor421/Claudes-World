@@ -119,12 +119,9 @@ function DayNightCycle() {
       sunRef.current.position.set(...sunPosition)
     }
 
-    // Update scene fog
+    // Fog disabled to allow viewing large cities
     if (scene.fog) {
-      scene.fog.color = fogColor
-      scene.fog.density = weather === 'rain' ? fogDensity * 2 : fogDensity
-    } else {
-      scene.fog = new THREE.FogExp2(fogColor, weather === 'rain' ? fogDensity * 2 : fogDensity)
+      scene.fog = null
     }
 
     // Update scene background

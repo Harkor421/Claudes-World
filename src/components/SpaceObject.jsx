@@ -15,16 +15,13 @@ function SpaceObject({
   const clonedScene = useMemo(() => {
     const clone = scene.clone()
 
-    // Enable shadows on all meshes
+    // Enable shadows on all meshes (share materials to prevent uniform overflow)
     clone.traverse((child) => {
       if (child.isMesh) {
         child.castShadow = true
         child.receiveShadow = true
-
-        // Clone material to avoid affecting other instances
-        if (child.material) {
-          child.material = child.material.clone()
-        }
+        // Note: We intentionally don't clone materials here to prevent
+        // WebGL shader uniform overflow when many buildings are placed
       }
     })
 
