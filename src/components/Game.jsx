@@ -1,9 +1,11 @@
 import React, { useEffect } from 'react'
 import { OrbitControls } from '@react-three/drei'
+import { useFrame } from '@react-three/fiber'
 import Ground from './Ground'
 import Character from './Character'
 import CompanySign from './CompanySign'
-import Lights from './Lights'
+import DayNightCycle from './DayNightCycle'
+import Weather from './Weather'
 import CityObject from './CityObject'
 import BuildProgress from './BuildProgress'
 import GridPreview from './GridPreview'
@@ -18,6 +20,21 @@ const snapToGrid = (pos) => [
   0,
   Math.round(pos[2] / GRID_SIZE) * GRID_SIZE
 ]
+
+// Component to handle auto time advancement
+function TimeAdvancer() {
+  const autoTimeEnabled = useGameStore((state) => state.autoTimeEnabled)
+  const advanceTime = useGameStore((state) => state.advanceTime)
+
+  useFrame((state, delta) => {
+    if (autoTimeEnabled) {
+      // Advance 1 hour per 10 real seconds
+      advanceTime(delta * 0.1)
+    }
+  })
+
+  return null
+}
 
 function Game() {
   const setKeyPressed = useGameStore((state) => state.setKeyPressed)
@@ -99,7 +116,9 @@ function Game() {
 
   return (
     <>
-      <Lights />
+      <DayNightCycle />
+      <Weather />
+      <TimeAdvancer />
 
       {/* Isometric-style camera controls */}
       <OrbitControls

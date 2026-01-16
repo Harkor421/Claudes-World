@@ -3,6 +3,7 @@ import { Canvas } from '@react-three/fiber'
 import Game from './components/Game'
 import UI from './components/UI'
 import BuildMenu from './components/BuildMenu'
+import SettingsMenu from './components/SettingsMenu'
 import { useGameStore } from './store/gameStore'
 
 function App() {
@@ -34,6 +35,7 @@ function App() {
       </Canvas>
       <UI />
       <BuildMenu />
+      <SettingsMenu />
     </>
   )
 }

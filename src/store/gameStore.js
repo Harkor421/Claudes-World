@@ -15,6 +15,11 @@ export const useGameStore = create((set, get) => ({
     right: false
   },
 
+  // Weather and time system
+  weather: 'clear', // 'clear', 'rain', 'snow'
+  timeOfDay: 12, // 0-24 hours (12 = noon)
+  autoTimeEnabled: false, // auto-advance time
+
   // Building system
   buildMenu: {
     isOpen: false,
@@ -76,6 +81,14 @@ export const useGameStore = create((set, get) => ({
     }
   },
   cancelBuild: () => set({ currentBuildTask: null, isBuilding: false }),
+
+  // Weather and time actions
+  setWeather: (weather) => set({ weather }),
+  setTimeOfDay: (time) => set({ timeOfDay: time % 24 }),
+  toggleAutoTime: () => set((state) => ({ autoTimeEnabled: !state.autoTimeEnabled })),
+  advanceTime: (delta) => set((state) => ({
+    timeOfDay: (state.timeOfDay + delta) % 24
+  })),
 
   // Buildings placed by AI (legacy)
   buildings: [],
