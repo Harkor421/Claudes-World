@@ -24,7 +24,7 @@ function Ground({ onClick, onContextMenu }) {
         onClick={onClick}
         onContextMenu={onContextMenu}
       >
-        <planeGeometry args={[50, 50]} />
+        <planeGeometry args={[100, 100]} />
         <meshStandardMaterial
           color="#4a5a6a"
           roughness={0.6}
@@ -35,12 +35,10 @@ function Ground({ onClick, onContextMenu }) {
       {/* Very subtle grid pattern with reduced opacity */}
       <gridHelper
         ref={gridRef}
-        args={[50, 50, '#6a7a8a', '#6a7a8a']}
+        args={[100, 100, '#6a7a8a', '#6a7a8a']}
         position={[0, 0.01, 0]}
         material={gridMaterial}
       />
-
-      {/* Removed ground spot for cleaner look */}
     </group>
   )
 }

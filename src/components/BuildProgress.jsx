@@ -1,7 +1,7 @@
 import React from 'react'
 import { Html } from '@react-three/drei'
 import { useGameStore } from '../store/gameStore'
-import CityObject from './CityObject'
+import SpaceObject from './SpaceObject'
 
 // Shows the building being constructed with progress
 function BuildProgress() {
@@ -17,7 +17,7 @@ function BuildProgress() {
     <group position={position}>
       {/* Ghost preview of building being constructed */}
       <group scale={[2 * progress, 2 * progress, 2 * progress]}>
-        <CityObject
+        <SpaceObject
           model={currentBuildTask.model}
           position={[0, 0, 0]}
           scale={1}

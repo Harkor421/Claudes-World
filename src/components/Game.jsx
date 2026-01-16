@@ -3,10 +3,9 @@ import { OrbitControls } from '@react-three/drei'
 import { useFrame } from '@react-three/fiber'
 import Ground from './Ground'
 import Character from './Character'
-import CompanySign from './CompanySign'
 import DayNightCycle from './DayNightCycle'
 import Weather from './Weather'
-import CityObject from './CityObject'
+import SpaceObject from './SpaceObject'
 import BuildProgress from './BuildProgress'
 import GridPreview from './GridPreview'
 import { useGameStore } from '../store/gameStore'
@@ -128,7 +127,7 @@ function Game() {
         minPolarAngle={Math.PI / 6}
         maxPolarAngle={Math.PI / 3}
         minDistance={8}
-        maxDistance={30}
+        maxDistance={60}
       />
 
       {/* Ground plane - clickable for movement, right-click for build */}
@@ -137,36 +136,18 @@ function Game() {
       {/* The Claude character */}
       <Character />
 
-      {/* Company sign prop */}
-      <CompanySign position={[-3, 0, -2]} />
+      {/* === CRASHED SHIP - CHARACTER SPAWN/REST AREA === */}
+      {/* Main crashed dropship - tilted as if it crashed */}
+      <SpaceObject
+        model="dropship"
+        position={[0, 0.2, 0]}
+        rotation={[0.1, 0.3, 0.08]}
+        scale={2}
+      />
 
-      {/* Decorative rock */}
-      <Rock position={[4, 0, 2]} />
-
-      {/* === CITY BUILDINGS === */}
-      {/* Positions snap to 2-unit grid to match building scale */}
-      {/* scale=2 makes buildings proportional to Claude */}
-
-      {/* Buildings - snapped to 2-unit grid */}
-      <CityObject model="building_A" position={[-10, 0, -10]} scale={2} />
-      <CityObject model="building_B" position={[-6, 0, -10]} scale={2} />
-      <CityObject model="building_C" position={[-2, 0, -10]} scale={2} />
-      <CityObject model="building_D" position={[2, 0, -10]} scale={2} />
-
-      {/* Roads - snapped to 2-unit grid */}
-      <CityObject model="road_straight" position={[-10, 0, -6]} rotation={[0, Math.PI / 2, 0]} scale={2} />
-      <CityObject model="road_straight" position={[-6, 0, -6]} rotation={[0, Math.PI / 2, 0]} scale={2} />
-      <CityObject model="road_straight" position={[-2, 0, -6]} rotation={[0, Math.PI / 2, 0]} scale={2} />
-      <CityObject model="road_straight" position={[2, 0, -6]} rotation={[0, Math.PI / 2, 0]} scale={2} />
-
-      {/* Trees and props - snapped to 2-unit grid */}
-      <CityObject model="tree_A" position={[-8, 0, 4]} scale={2} />
-      <CityObject model="tree_B" position={[-4, 0, 6]} scale={2} />
-      <CityObject model="bench" position={[4, 0, 4]} rotation={[0, Math.PI, 0]} scale={2} />
-      <CityObject model="streetlight" position={[-10, 0, -6]} scale={2} />
-
-      {/* Vehicles - snapped to 2-unit grid */}
-      <CityObject model="car_sedan" position={[-8, 0, -6]} rotation={[0, Math.PI / 2, 0]} scale={2} />
+      {/* Small debris right next to the ship */}
+      <SpaceObject model="cargo_A" position={[-2.5, 0, 1.5]} rotation={[0.05, 0.6, 0]} scale={2} />
+      <SpaceObject model="cargo_B" position={[2.5, 0, 1]} rotation={[0, -0.4, 0.05]} scale={2} />
 
       {/* Grid preview for building placement */}
       <GridPreview />
@@ -176,7 +157,7 @@ function Game() {
 
       {/* Player-placed buildings */}
       {placedBuildings.map((building) => (
-        <CityObject
+        <SpaceObject
           key={building.id}
           model={building.model}
           position={building.position}

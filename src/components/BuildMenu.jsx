@@ -4,54 +4,81 @@ import { useGameStore } from '../store/gameStore'
 // Building sizes in grid units (1 grid unit = 2 world units, matching building scale)
 // Format: [width, depth] in grid squares
 export const BUILDING_SIZES = {
-  // Buildings - 1x1 grid square (2x2 world units)
-  'building_A': [1, 1],
-  'building_B': [1, 1],
-  'building_C': [1, 1],
-  'building_D': [1, 1],
-  'building_E': [1, 1],
-  'building_F': [1, 1],
-  'building_G': [1, 1],
-  'building_H': [1, 1],
-  'watertower': [1, 1],
+  // Base modules - various sizes
+  'basemodule_A': [1, 1],
+  'basemodule_B': [1, 1],
+  'basemodule_C': [1, 1],
+  'basemodule_D': [1, 1],
+  'basemodule_E': [1, 1],
+  'basemodule_garage': [2, 1],
+  'dome': [1, 1],
+  'eco_module': [1, 1],
+  'water_storage': [1, 1],
 
-  // Roads - 1x1 grid square
-  'road_straight': [1, 1],
-  'road_corner': [1, 1],
-  'road_corner_curved': [1, 1],
-  'road_junction': [1, 1],
-  'road_tsplit': [1, 1],
-  'road_straight_crossing': [1, 1],
+  // Roof modules
+  'roofmodule_base': [1, 1],
+  'roofmodule_cargo_A': [1, 1],
+  'roofmodule_cargo_B': [1, 1],
+  'roofmodule_cargo_C': [1, 1],
+  'roofmodule_solarpanels': [1, 1],
 
-  // Nature - 1x1 grid square
-  'tree_A': [1, 1],
-  'tree_B': [1, 1],
-  'tree_C': [1, 1],
-  'tree_D': [1, 1],
-  'tree_E': [1, 1],
-  'bush': [1, 1],
-  'bush_A': [1, 1],
-  'bush_B': [1, 1],
-  'bush_C': [1, 1],
+  // Cargo and containers
+  'cargo_A': [1, 1],
+  'cargo_A_packed': [1, 1],
+  'cargo_A_stacked': [1, 1],
+  'cargo_B': [1, 1],
+  'cargo_B_packed': [1, 1],
+  'cargo_B_stacked': [1, 1],
+  'containers_A': [1, 1],
+  'containers_B': [1, 1],
+  'containers_C': [1, 1],
+  'containers_D': [1, 1],
+  'cargodepot_A': [2, 1],
+  'cargodepot_B': [2, 1],
+  'cargodepot_C': [2, 1],
 
-  // Props - 1x1 grid square
-  'bench': [1, 1],
-  'streetlight': [1, 1],
-  'streetlight_old_single': [1, 1],
-  'streetlight_old_double': [1, 1],
-  'firehydrant': [1, 1],
-  'dumpster': [1, 1],
-  'trash_A': [1, 1],
-  'trash_B': [1, 1],
-  'box_A': [1, 1],
-  'box_B': [1, 1],
+  // Vehicles
+  'dropship': [2, 2],
+  'dropship_packed': [2, 2],
+  'lander_A': [1, 1],
+  'lander_B': [1, 1],
+  'lander_base': [1, 1],
+  'spacetruck': [1, 2],
+  'spacetruck_large': [1, 2],
+  'spacetruck_trailer': [1, 2],
+  'mobile_base_cargo': [1, 2],
+  'mobile_base_carriage': [1, 2],
+  'mobile_base_command': [1, 2],
+  'mobile_base_frame': [1, 2],
 
-  // Vehicles - 1x1 grid square
-  'car_sedan': [1, 1],
-  'car_taxi': [1, 1],
-  'car_police': [1, 1],
-  'car_hatchback': [1, 1],
-  'car_stationwagon': [1, 1],
+  // Landing pads
+  'landingpad_large': [2, 2],
+  'landingpad_small': [1, 1],
+
+  // Structures
+  'structure_low': [1, 1],
+  'structure_tall': [1, 1],
+  'drill_structure': [1, 1],
+  'space_farm_large': [2, 2],
+  'space_farm_small': [1, 1],
+  'solarpanel': [1, 1],
+  'lights': [1, 1],
+
+  // Terrain
+  'terrain_low': [1, 1],
+  'terrain_tall': [1, 1],
+
+  // Tunnels
+  'tunnel_straight_A': [1, 1],
+  'tunnel_straight_B': [1, 1],
+  'tunnel_diagonal_short_A': [1, 1],
+  'tunnel_diagonal_long_A': [2, 1],
+
+  // Rocks
+  'rock_A': [1, 1],
+  'rock_B': [1, 1],
+  'rocks_A': [1, 1],
+  'rocks_B': [1, 1],
 }
 
 // Get size for a model, default to 1x1
@@ -59,57 +86,77 @@ export const getBuildingSize = (model) => BUILDING_SIZES[model] || [1, 1]
 
 const MENU_CATEGORIES = [
   {
-    name: 'Buildings',
+    name: 'Modules',
     items: [
-      { model: 'building_A', label: 'Shop' },
-      { model: 'building_B', label: 'Apartment' },
-      { model: 'building_C', label: 'Office' },
-      { model: 'building_D', label: 'Red Building' },
-      { model: 'building_E', label: 'Tall Building' },
-      { model: 'building_F', label: 'Green Building' },
-      { model: 'building_G', label: 'Yellow Building' },
-      { model: 'building_H', label: 'Blue Building' },
-      { model: 'watertower', label: 'Water Tower' },
+      { model: 'basemodule_A', label: 'Module A' },
+      { model: 'basemodule_B', label: 'Module B' },
+      { model: 'basemodule_C', label: 'Module C' },
+      { model: 'basemodule_D', label: 'Module D' },
+      { model: 'basemodule_garage', label: 'Garage' },
+      { model: 'dome', label: 'Dome' },
+      { model: 'eco_module', label: 'Eco Module' },
+      { model: 'water_storage', label: 'Water Tank' },
     ]
   },
   {
-    name: 'Roads',
+    name: 'Roofs',
     items: [
-      { model: 'road_straight', label: 'Road Straight' },
-      { model: 'road_corner', label: 'Road Corner' },
-      { model: 'road_corner_curved', label: 'Road Curved' },
-      { model: 'road_junction', label: 'Road Junction' },
-      { model: 'road_tsplit', label: 'Road T-Split' },
+      { model: 'roofmodule_base', label: 'Roof Base' },
+      { model: 'roofmodule_cargo_A', label: 'Roof Cargo' },
+      { model: 'roofmodule_solarpanels', label: 'Solar Roof' },
     ]
   },
   {
-    name: 'Nature',
+    name: 'Cargo',
     items: [
-      { model: 'tree_A', label: 'Tree A' },
-      { model: 'tree_B', label: 'Tree B' },
-      { model: 'tree_C', label: 'Tree C' },
-      { model: 'bush', label: 'Bush' },
-      { model: 'bush_A', label: 'Bush A' },
-    ]
-  },
-  {
-    name: 'Props',
-    items: [
-      { model: 'bench', label: 'Bench' },
-      { model: 'streetlight', label: 'Street Light' },
-      { model: 'streetlight_old_single', label: 'Old Light' },
-      { model: 'firehydrant', label: 'Fire Hydrant' },
-      { model: 'dumpster', label: 'Dumpster' },
-      { model: 'trash_A', label: 'Trash' },
+      { model: 'cargo_A', label: 'Cargo A' },
+      { model: 'cargo_B', label: 'Cargo B' },
+      { model: 'cargo_A_stacked', label: 'Stacked Cargo' },
+      { model: 'containers_A', label: 'Containers A' },
+      { model: 'containers_B', label: 'Containers B' },
+      { model: 'cargodepot_A', label: 'Cargo Depot' },
     ]
   },
   {
     name: 'Vehicles',
     items: [
-      { model: 'car_sedan', label: 'Sedan' },
-      { model: 'car_taxi', label: 'Taxi' },
-      { model: 'car_police', label: 'Police Car' },
-      { model: 'car_hatchback', label: 'Hatchback' },
+      { model: 'dropship', label: 'Dropship' },
+      { model: 'lander_A', label: 'Lander A' },
+      { model: 'lander_B', label: 'Lander B' },
+      { model: 'spacetruck', label: 'Space Truck' },
+      { model: 'spacetruck_large', label: 'Large Truck' },
+      { model: 'mobile_base_command', label: 'Mobile Base' },
+    ]
+  },
+  {
+    name: 'Structures',
+    items: [
+      { model: 'landingpad_large', label: 'Landing Pad L' },
+      { model: 'landingpad_small', label: 'Landing Pad S' },
+      { model: 'solarpanel', label: 'Solar Panel' },
+      { model: 'drill_structure', label: 'Drill' },
+      { model: 'space_farm_small', label: 'Small Farm' },
+      { model: 'lights', label: 'Lights' },
+    ]
+  },
+  {
+    name: 'Terrain',
+    items: [
+      { model: 'rock_A', label: 'Rock A' },
+      { model: 'rock_B', label: 'Rock B' },
+      { model: 'rocks_A', label: 'Rocks A' },
+      { model: 'rocks_B', label: 'Rocks B' },
+      { model: 'terrain_low', label: 'Low Terrain' },
+      { model: 'terrain_tall', label: 'Tall Terrain' },
+    ]
+  },
+  {
+    name: 'Tunnels',
+    items: [
+      { model: 'tunnel_straight_A', label: 'Tunnel Straight' },
+      { model: 'tunnel_straight_B', label: 'Tunnel B' },
+      { model: 'tunnel_diagonal_short_A', label: 'Diagonal Short' },
+      { model: 'tunnel_diagonal_long_A', label: 'Diagonal Long' },
     ]
   },
 ]

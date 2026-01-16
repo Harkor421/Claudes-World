@@ -20,6 +20,10 @@ export const useGameStore = create((set, get) => ({
   timeOfDay: 12, // 0-24 hours (12 = noon)
   autoTimeEnabled: false, // auto-advance time
 
+  // Claude's stats
+  mood: 80, // 0-100 (happy to sad)
+  energy: 100, // 0-100
+
   // Building system
   buildMenu: {
     isOpen: false,
@@ -89,6 +93,12 @@ export const useGameStore = create((set, get) => ({
   advanceTime: (delta) => set((state) => ({
     timeOfDay: (state.timeOfDay + delta) % 24
   })),
+
+  // Stats actions
+  setMood: (mood) => set({ mood: Math.max(0, Math.min(100, mood)) }),
+  setEnergy: (energy) => set({ energy: Math.max(0, Math.min(100, energy)) }),
+  adjustMood: (delta) => set((state) => ({ mood: Math.max(0, Math.min(100, state.mood + delta)) })),
+  adjustEnergy: (delta) => set((state) => ({ energy: Math.max(0, Math.min(100, state.energy + delta)) })),
 
   // Buildings placed by AI (legacy)
   buildings: [],
