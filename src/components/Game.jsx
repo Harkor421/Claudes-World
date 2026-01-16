@@ -9,14 +9,14 @@ import BuildProgress from './BuildProgress'
 import GridPreview from './GridPreview'
 import { useGameStore } from '../store/gameStore'
 
-// Grid size for snapping
-const GRID_SIZE = 1
+// Grid size for snapping (matches building scale of 2)
+const GRID_SIZE = 2
 
 // Snap position to grid center
 const snapToGrid = (pos) => [
-  Math.floor(pos[0] / GRID_SIZE) * GRID_SIZE + GRID_SIZE / 2,
+  Math.round(pos[0] / GRID_SIZE) * GRID_SIZE,
   0,
-  Math.floor(pos[2] / GRID_SIZE) * GRID_SIZE + GRID_SIZE / 2
+  Math.round(pos[2] / GRID_SIZE) * GRID_SIZE
 ]
 
 function Game() {
@@ -125,29 +125,29 @@ function Game() {
       <Rock position={[4, 0, 2]} />
 
       {/* === CITY BUILDINGS === */}
-      {/* Adjust position=[x, y, z] and rotation=[0, angle, 0] to place manually */}
+      {/* Positions snap to 2-unit grid to match building scale */}
       {/* scale=2 makes buildings proportional to Claude */}
 
-      {/* Buildings */}
+      {/* Buildings - snapped to 2-unit grid */}
       <CityObject model="building_A" position={[-10, 0, -10]} scale={2} />
-      <CityObject model="building_B" position={[-4, 0, -10]} scale={2} />
-      <CityObject model="building_C" position={[2, 0, -10]} scale={2} />
-      <CityObject model="building_D" position={[8, 0, -10]} scale={2} />
+      <CityObject model="building_B" position={[-6, 0, -10]} scale={2} />
+      <CityObject model="building_C" position={[-2, 0, -10]} scale={2} />
+      <CityObject model="building_D" position={[2, 0, -10]} scale={2} />
 
-      {/* Roads */}
-      <CityObject model="road_straight" position={[-10, 0, -4]} rotation={[0, Math.PI / 2, 0]} scale={2} />
-      <CityObject model="road_straight" position={[-4, 0, -4]} rotation={[0, Math.PI / 2, 0]} scale={2} />
-      <CityObject model="road_straight" position={[2, 0, -4]} rotation={[0, Math.PI / 2, 0]} scale={2} />
-      <CityObject model="road_straight" position={[8, 0, -4]} rotation={[0, Math.PI / 2, 0]} scale={2} />
+      {/* Roads - snapped to 2-unit grid */}
+      <CityObject model="road_straight" position={[-10, 0, -6]} rotation={[0, Math.PI / 2, 0]} scale={2} />
+      <CityObject model="road_straight" position={[-6, 0, -6]} rotation={[0, Math.PI / 2, 0]} scale={2} />
+      <CityObject model="road_straight" position={[-2, 0, -6]} rotation={[0, Math.PI / 2, 0]} scale={2} />
+      <CityObject model="road_straight" position={[2, 0, -6]} rotation={[0, Math.PI / 2, 0]} scale={2} />
 
-      {/* Trees and props */}
+      {/* Trees and props - snapped to 2-unit grid */}
       <CityObject model="tree_A" position={[-8, 0, 4]} scale={2} />
-      <CityObject model="tree_B" position={[-4, 0, 5]} scale={2} />
-      <CityObject model="bench" position={[3, 0, 4]} rotation={[0, Math.PI, 0]} scale={2} />
-      <CityObject model="streetlight" position={[-10, 0, -4]} scale={2} />
+      <CityObject model="tree_B" position={[-4, 0, 6]} scale={2} />
+      <CityObject model="bench" position={[4, 0, 4]} rotation={[0, Math.PI, 0]} scale={2} />
+      <CityObject model="streetlight" position={[-10, 0, -6]} scale={2} />
 
-      {/* Vehicles */}
-      <CityObject model="car_sedan" position={[-7, 0, -4]} rotation={[0, Math.PI / 2, 0]} scale={2} />
+      {/* Vehicles - snapped to 2-unit grid */}
+      <CityObject model="car_sedan" position={[-8, 0, -6]} rotation={[0, Math.PI / 2, 0]} scale={2} />
 
       {/* Grid preview for building placement */}
       <GridPreview />

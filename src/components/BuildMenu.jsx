@@ -1,29 +1,29 @@
 import React, { useEffect } from 'react'
 import { useGameStore } from '../store/gameStore'
 
-// Building sizes in grid units (1 unit = 1 grid square)
+// Building sizes in grid units (1 grid unit = 2 world units, matching building scale)
 // Format: [width, depth] in grid squares
 export const BUILDING_SIZES = {
-  // Buildings (larger footprints)
-  'building_A': [2, 2],
-  'building_B': [2, 2],
-  'building_C': [2, 2],
-  'building_D': [2, 2],
-  'building_E': [2, 2],
-  'building_F': [2, 2],
-  'building_G': [2, 2],
-  'building_H': [2, 2],
+  // Buildings - 1x1 grid square (2x2 world units)
+  'building_A': [1, 1],
+  'building_B': [1, 1],
+  'building_C': [1, 1],
+  'building_D': [1, 1],
+  'building_E': [1, 1],
+  'building_F': [1, 1],
+  'building_G': [1, 1],
+  'building_H': [1, 1],
   'watertower': [1, 1],
 
-  // Roads (standard road width)
-  'road_straight': [2, 2],
-  'road_corner': [2, 2],
-  'road_corner_curved': [2, 2],
-  'road_junction': [2, 2],
-  'road_tsplit': [2, 2],
-  'road_straight_crossing': [2, 2],
+  // Roads - 1x1 grid square
+  'road_straight': [1, 1],
+  'road_corner': [1, 1],
+  'road_corner_curved': [1, 1],
+  'road_junction': [1, 1],
+  'road_tsplit': [1, 1],
+  'road_straight_crossing': [1, 1],
 
-  // Nature (smaller)
+  // Nature - 1x1 grid square
   'tree_A': [1, 1],
   'tree_B': [1, 1],
   'tree_C': [1, 1],
@@ -34,7 +34,7 @@ export const BUILDING_SIZES = {
   'bush_B': [1, 1],
   'bush_C': [1, 1],
 
-  // Props (small)
+  // Props - 1x1 grid square
   'bench': [1, 1],
   'streetlight': [1, 1],
   'streetlight_old_single': [1, 1],
@@ -46,12 +46,12 @@ export const BUILDING_SIZES = {
   'box_A': [1, 1],
   'box_B': [1, 1],
 
-  // Vehicles
-  'car_sedan': [1, 2],
-  'car_taxi': [1, 2],
-  'car_police': [1, 2],
-  'car_hatchback': [1, 2],
-  'car_stationwagon': [1, 2],
+  // Vehicles - 1x1 grid square
+  'car_sedan': [1, 1],
+  'car_taxi': [1, 1],
+  'car_police': [1, 1],
+  'car_hatchback': [1, 1],
+  'car_stationwagon': [1, 1],
 }
 
 // Get size for a model, default to 1x1
@@ -185,13 +185,16 @@ function BuildMenu() {
     closeBuildMenu()
   }
 
+  // Position menu to the right side of screen, away from the grid preview
+  const menuX = Math.min(buildMenu.screenPosition?.x + 200 || 0, window.innerWidth - 250)
+  const menuY = Math.max(Math.min(buildMenu.screenPosition?.y || 0, window.innerHeight - 250), 50)
+
   return (
     <div
       style={{
         position: 'fixed',
-        left: buildMenu.screenPosition?.x || 0,
-        top: buildMenu.screenPosition?.y || 0,
-        transform: 'translate(-50%, -50%)',
+        left: menuX,
+        top: menuY,
         zIndex: 1000,
       }}
       onClick={(e) => e.stopPropagation()}

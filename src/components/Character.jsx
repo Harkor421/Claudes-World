@@ -8,31 +8,106 @@ import { useGameStore } from '../store/gameStore'
 // Build duration in seconds
 const BUILD_DURATION = 5
 
-// Create hit sound
-const createHitSound = () => {
-  const audioContext = new (window.AudioContext || window.webkitAudioContext)()
+// Audio context shared between sounds
+let audioContext = null
 
+const getAudioContext = () => {
+  if (!audioContext) {
+    audioContext = new (window.AudioContext || window.webkitAudioContext)()
+  }
+  return audioContext
+}
+
+// Create hit sound for building
+const createHitSound = () => {
   return () => {
-    const oscillator = audioContext.createOscillator()
-    const gainNode = audioContext.createGain()
+    const ctx = getAudioContext()
+    const oscillator = ctx.createOscillator()
+    const gainNode = ctx.createGain()
 
     oscillator.connect(gainNode)
-    gainNode.connect(audioContext.destination)
+    gainNode.connect(ctx.destination)
 
     // Voxel-style hit sound
-    oscillator.frequency.setValueAtTime(200 + Math.random() * 100, audioContext.currentTime)
-    oscillator.frequency.exponentialRampToValueAtTime(100, audioContext.currentTime + 0.1)
+    oscillator.frequency.setValueAtTime(200 + Math.random() * 100, ctx.currentTime)
+    oscillator.frequency.exponentialRampToValueAtTime(100, ctx.currentTime + 0.1)
     oscillator.type = 'square'
 
-    gainNode.gain.setValueAtTime(0.15, audioContext.currentTime)
-    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.1)
+    gainNode.gain.setValueAtTime(0.15, ctx.currentTime)
+    gainNode.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.1)
 
-    oscillator.start(audioContext.currentTime)
-    oscillator.stop(audioContext.currentTime + 0.1)
+    oscillator.start(ctx.currentTime)
+    oscillator.stop(ctx.currentTime + 0.1)
+  }
+}
+
+// Create footstep sound with distance-based volume
+const createFootstepSound = () => {
+  // Alternate between two slightly different footstep sounds
+  let stepIndex = 0
+
+  return (distance) => {
+    const ctx = getAudioContext()
+    const now = ctx.currentTime
+
+    // Calculate volume based on distance (max distance ~25 units)
+    const maxDistance = 25
+    const minVolume = 0.01
+    const maxVolume = 0.35
+    const volume = Math.max(minVolume, maxVolume * (1 - Math.min(distance / maxDistance, 1)))
+
+    // Alternate between left/right foot
+    stepIndex = (stepIndex + 1) % 2
+
+    // Create noise buffer for footstep texture
+    const bufferSize = ctx.sampleRate * 0.08 // 80ms of noise
+    const noiseBuffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate)
+    const output = noiseBuffer.getChannelData(0)
+    for (let i = 0; i < bufferSize; i++) {
+      output[i] = Math.random() * 2 - 1
+    }
+
+    // Noise source (the "scrape/texture" of the step)
+    const noise = ctx.createBufferSource()
+    noise.buffer = noiseBuffer
+
+    // Bandpass filter to shape the noise into a footstep sound
+    const filter = ctx.createBiquadFilter()
+    filter.type = 'bandpass'
+    filter.frequency.setValueAtTime(stepIndex === 0 ? 800 : 900, now)
+    filter.Q.setValueAtTime(1.5, now)
+
+    // Gain envelope for noise
+    const noiseGain = ctx.createGain()
+    noiseGain.gain.setValueAtTime(volume * 0.5, now)
+    noiseGain.gain.exponentialRampToValueAtTime(0.001, now + 0.08)
+
+    noise.connect(filter)
+    filter.connect(noiseGain)
+    noiseGain.connect(ctx.destination)
+
+    // Low thump (the impact)
+    const thump = ctx.createOscillator()
+    const thumpGain = ctx.createGain()
+    thump.type = 'sine'
+    thump.frequency.setValueAtTime(stepIndex === 0 ? 60 : 55, now)
+    thump.frequency.exponentialRampToValueAtTime(30, now + 0.06)
+    thumpGain.gain.setValueAtTime(volume * 0.8, now)
+    thumpGain.gain.exponentialRampToValueAtTime(0.001, now + 0.08)
+
+    thump.connect(thumpGain)
+    thumpGain.connect(ctx.destination)
+
+    // Start and stop
+    noise.start(now)
+    noise.stop(now + 0.08)
+    thump.start(now)
+    thump.stop(now + 0.08)
   }
 }
 
 let playHitSound = null
+let playFootstepSound = null
 
 // Main character with loaded GLB model and animations
 function LoadedCharacter() {
@@ -43,6 +118,7 @@ function LoadedCharacter() {
   const wasBuildingRef = useRef(false)
   const buildStartTimeRef = useRef(null)
   const lastHitSoundRef = useRef(0)
+  const lastFootstepRef = useRef(0)
 
   const characterPosition = useGameStore((state) => state.characterPosition)
   const setCharacterPosition = useGameStore((state) => state.setCharacterPosition)
@@ -61,11 +137,14 @@ function LoadedCharacter() {
   const moveSpeed = 0.06
   const rotationSpeed = 0.12
 
-  // Initialize sound on first interaction
+  // Initialize sounds on first interaction
   useEffect(() => {
     const initSound = () => {
       if (!playHitSound) {
         playHitSound = createHitSound()
+      }
+      if (!playFootstepSound) {
+        playFootstepSound = createFootstepSound()
       }
       window.removeEventListener('click', initSound)
     }
@@ -122,6 +201,9 @@ function LoadedCharacter() {
     let moving = false
     let targetDir = new THREE.Vector3()
 
+    // Get camera position for distance-based sound
+    const cameraPos = state.camera.position
+
     // Check if we have a build task and arrived at destination
     const hasBuildTask = currentBuildTask && !isBuilding
     const buildTarget = currentBuildTask ? new THREE.Vector3(...currentBuildTask.position) : null
@@ -163,6 +245,18 @@ function LoadedCharacter() {
             buildStartTimeRef.current = Date.now()
           }
         }
+      }
+    }
+
+    // Play footstep sounds while moving
+    if (moving && playFootstepSound) {
+      const now = Date.now()
+      const stepInterval = 250 // ms between footsteps
+      if (now - lastFootstepRef.current > stepInterval) {
+        // Calculate distance from camera to character
+        const distanceToCamera = cameraPos.distanceTo(currentPos)
+        playFootstepSound(distanceToCamera)
+        lastFootstepRef.current = now
       }
     }
 
