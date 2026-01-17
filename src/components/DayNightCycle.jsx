@@ -36,14 +36,14 @@ const TIME_SETTINGS = {
     fogDensity: 0.015,
   },
   night: {
-    ambientIntensity: 0.15,
-    ambientColor: '#334466',
-    sunIntensity: 0.2,
-    sunColor: '#8899bb',
-    sunPosition: [-5, 15, 5],
-    skyColor: '#112244',
-    fogColor: '#1a2a4a',
-    fogDensity: 0.02,
+    ambientIntensity: 0.5,
+    ambientColor: '#6688aa',
+    sunIntensity: 0.7,
+    sunColor: '#99bbdd',
+    sunPosition: [-15, 25, -15],
+    skyColor: '#0a1525',
+    fogColor: '#0a1525',
+    fogDensity: 0.015,
   },
 }
 
@@ -83,6 +83,13 @@ function DayNightCycle() {
 
   const ambientRef = useRef()
   const sunRef = useRef()
+  const moonRef = useRef()
+
+  // Calculate moon visibility (visible from dusk to dawn)
+  const isNightTime = timeOfDay < 6 || timeOfDay >= 18
+  const moonOpacity = isNightTime
+    ? (timeOfDay >= 18 ? (timeOfDay - 18) / 2 : timeOfDay < 6 ? 1 - timeOfDay / 6 : 0)
+    : 0
 
   useFrame(({ scene }) => {
     const { from, to, t } = getTimePhase(timeOfDay)
@@ -135,6 +142,14 @@ function DayNightCycle() {
     }
   })
 
+  // Moon position in sky (moves across during night)
+  const moonAngle = isNightTime
+    ? (timeOfDay >= 18 ? (timeOfDay - 18) / 12 : (timeOfDay + 6) / 12) * Math.PI
+    : 0
+  const moonX = Math.cos(moonAngle) * 80
+  const moonY = Math.sin(moonAngle) * 40 + 30
+  const moonZ = -60
+
   return (
     <>
       <ambientLight ref={ambientRef} intensity={0.6} />
@@ -150,6 +165,30 @@ function DayNightCycle() {
         shadow-camera-top={20}
         shadow-camera-bottom={-20}
       />
+
+      {/* Moon - visible at night */}
+      {moonOpacity > 0 && (
+        <group position={[moonX, moonY, moonZ]}>
+          {/* Moon sphere */}
+          <mesh ref={moonRef}>
+            <sphereGeometry args={[8, 32, 32]} />
+            <meshBasicMaterial
+              color="#ffffee"
+              transparent
+              opacity={Math.min(moonOpacity * 1.5, 1)}
+            />
+          </mesh>
+          {/* Moon glow */}
+          <mesh>
+            <sphereGeometry args={[12, 32, 32]} />
+            <meshBasicMaterial
+              color="#aaccff"
+              transparent
+              opacity={moonOpacity * 0.3}
+            />
+          </mesh>
+        </group>
+      )}
     </>
   )
 }

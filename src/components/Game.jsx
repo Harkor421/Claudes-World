@@ -1,6 +1,5 @@
 import React from 'react'
 import { OrbitControls } from '@react-three/drei'
-import { useFrame } from '@react-three/fiber'
 import Ground from './Ground'
 import Character from './Character'
 import DayNightCycle from './DayNightCycle'
@@ -12,6 +11,12 @@ import { InteractiveBuilding } from './BuildingInteraction'
 import VoxelEffectsManager from './VoxelParticles'
 import VoxelClouds from './VoxelClouds'
 import { useGameStore } from '../store/gameStore'
+
+// Time is now controlled by the server (10 real minutes = 1 game day)
+// The server broadcasts TIME_UPDATE messages which are handled in useAIBrain
+function TimeAdvancer() {
+  return null
+}
 
 // Space models - used to detect folder when not specified
 const SPACE_MODELS = [
@@ -43,25 +48,6 @@ const SPACE_MODELS = [
 const getModelFolder = (building) => {
   if (SPACE_MODELS.includes(building.model)) return 'space'
   return building.folder || 'city'
-}
-
-// Component to handle auto time advancement (synced with AI speed)
-function TimeAdvancer() {
-  const autoTimeEnabled = useGameStore((state) => state.autoTimeEnabled)
-  const advanceTime = useGameStore((state) => state.advanceTime)
-  const aiSpeed = useGameStore((state) => state.aiSpeed)
-
-  useFrame((state, delta) => {
-    if (autoTimeEnabled) {
-      // Base: 1 real second = 30 game minutes (0.5 hours)
-      // So 1 full day (24 hours) = 48 real seconds at 1x speed
-      // At 10x speed: 1 full day = 4.8 real seconds
-      const hoursPerSecond = 0.5 * aiSpeed // 0.5 hours per second * speed multiplier
-      advanceTime(delta * hoursPerSecond)
-    }
-  })
-
-  return null
 }
 
 function Game() {

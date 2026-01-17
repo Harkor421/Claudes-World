@@ -19,6 +19,41 @@ const wss = new WebSocketServer({ server })
 const worldState = new WorldState()
 const claudeBrain = new ClaudeBrain(worldState)
 
+// Time system - server is the source of truth
+// 10 real minutes = 1 game day (600 seconds = 24 hours)
+// So 1 second = 24/600 = 0.04 game hours
+const TIME_SCALE = 24 / 600 // hours per real second
+let timeInterval = null
+
+function startTimeSystem() {
+  if (timeInterval) return
+
+  timeInterval = setInterval(() => {
+    const delta = TIME_SCALE // advance by this many hours per second
+    const newTime = (worldState.timeOfDay + delta) % 24
+
+    worldState.setTime(newTime)
+
+    // Broadcast time to all clients
+    broadcast({
+      type: 'TIME_UPDATE',
+      payload: {
+        timeOfDay: newTime,
+        day: worldState.day
+      }
+    })
+  }, 1000) // tick every second
+
+  console.log('Time system started (10 real minutes = 1 game day)')
+}
+
+function stopTimeSystem() {
+  if (timeInterval) {
+    clearInterval(timeInterval)
+    timeInterval = null
+  }
+}
+
 // Track connected clients
 const clients = new Set()
 
@@ -71,9 +106,8 @@ function handleClientMessage(message, ws) {
       break
 
     case 'TIME_UPDATE':
-      // Client updating time of day
-      worldState.setTime(message.payload.timeOfDay)
-      claudeBrain.onTimeUpdate(message.payload.timeOfDay)
+      // Server is now the source of truth for time - ignore client time updates
+      // Time is managed by the server's time system (10 real minutes = 1 game day)
       break
 
     case 'CHARACTER_POSITION':
@@ -105,8 +139,8 @@ function handleClientMessage(message, ws) {
     case 'BUILDING_PLACED':
       // Client confirming a building was placed
       worldState.addBuilding(message.payload)
-      // Broadcast updated state to all clients
-      broadcast({ type: 'WORLD_STATE', payload: worldState.getState() })
+      // Just broadcast the new building, not the entire world state
+      broadcast({ type: 'BUILDING_PLACED', payload: message.payload })
       break
 
     case 'REQUEST_AI_ACTION':
@@ -151,14 +185,10 @@ function handleClientMessage(message, ws) {
         scale: 2
       }
       worldState.addBuilding(building)
-      // Broadcast building placement
+      // Just broadcast the building, not the entire world state
       broadcast({
         type: 'BUILDING_PLACED',
         payload: building
-      })
-      broadcast({
-        type: 'WORLD_STATE',
-        payload: worldState.getState()
       })
       break
 
@@ -212,23 +242,43 @@ app.post('/stop', (req, res) => {
 app.post('/reset', (req, res) => {
   console.log('Resetting world state...')
   claudeBrain.stopActivityLoop()
+  stopTimeSystem()
 
-  // Clear all buildings
+  // Clear all buildings and reset stats
   worldState.buildings = []
   worldState.occupiedCells.clear()
   worldState.characterPosition = [0, 0, 0]
   worldState.energy = 100
   worldState.mood = 80
+  worldState.stats = {
+    population: 0,
+    power: 0,
+    powerConsumption: 0,
+    water: 0,
+    waterConsumption: 0,
+    food: 0,
+    foodConsumption: 0,
+    morale: 50,
+  }
+  worldState.zones = {
+    residential: [],
+    industrial: [],
+    power: [],
+    agriculture: [],
+    storage: [],
+  }
 
-  // Reset brain state for AI city planner
-  claudeBrain.currentRing = 0
+  // Reset brain state for AI city planner (neighborhood-based growth)
   claudeBrain.buildQueue = []
   claudeBrain.isBuildingInProgress = false
   claudeBrain.isThinking = false
   claudeBrain.totalPopulation = 0
   claudeBrain.buildingCount = 0
-  claudeBrain.roadPositions.clear()
-  claudeBrain.generateCoreInfrastructure()
+  claudeBrain.neighborhoods = []
+  claudeBrain.currentNeighborhood = null
+  claudeBrain.roadNetwork = new Set()
+  claudeBrain.zones = { residential: [], commercial: [], industrial: [] }
+  claudeBrain.initializeCity()
 
   // Broadcast reset to all clients
   broadcast({
@@ -236,7 +286,8 @@ app.post('/reset', (req, res) => {
     payload: worldState.getState()
   })
 
-  // Restart building
+  // Restart time and building
+  startTimeSystem()
   claudeBrain.startActivityLoop()
 
   res.json({ status: 'World reset', buildings: 0 })
@@ -246,6 +297,9 @@ const PORT = process.env.PORT || 3001
 server.listen(PORT, () => {
   console.log(`Claude's World Server running on port ${PORT}`)
   console.log(`WebSocket available at ws://localhost:${PORT}`)
+
+  // Start time system - server is source of truth for time
+  startTimeSystem()
 
   // Start AI activity loop immediately - independent of clients
   console.log('Starting autonomous AI city builder...')

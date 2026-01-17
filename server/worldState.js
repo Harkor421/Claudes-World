@@ -57,10 +57,8 @@ export class WorldState {
       day: this.day,
       weather: this.weather,
       stats: this.stats,
-      zones: this.zones,
-      occupiedCells: Array.from(this.occupiedCells),
+      // Don't send zones and occupiedCells - they're huge and can be rebuilt
       totalBuildings: this.buildings.length,
-      historyLength: this.history.length,
       // Character state
       characterPosition: this.characterPosition,
       characterRotation: this.characterRotation,
@@ -68,9 +66,6 @@ export class WorldState {
       isMoving: this.isMoving,
       mood: this.mood,
       energy: this.energy,
-      // Current action
-      currentAction: this.currentAction,
-      actionQueueLength: this.actionQueue.length,
     }
   }
 
@@ -79,9 +74,7 @@ export class WorldState {
       this.buildings = clientState.placedBuildings
       this.rebuildOccupancyMap()
     }
-    if (clientState.timeOfDay !== undefined) {
-      this.timeOfDay = clientState.timeOfDay
-    }
+    // Time is now managed by the server - don't sync from client
     if (clientState.weather) {
       this.weather = clientState.weather
     }
@@ -128,9 +121,10 @@ export class WorldState {
     const previousTime = this.timeOfDay
     this.timeOfDay = time
 
-    // New day detection
+    // New day detection - when time wraps from high to low
     if (previousTime > 20 && time < 4) {
       this.day++
+      console.log(`Day ${this.day} begins!`)
       this.calculateDailyStats()
     }
   }

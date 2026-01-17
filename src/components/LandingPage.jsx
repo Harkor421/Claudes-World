@@ -1,0 +1,694 @@
+import React, { Suspense, useRef } from 'react'
+import { Canvas, useFrame } from '@react-three/fiber'
+import { OrbitControls, useGLTF } from '@react-three/drei'
+import * as THREE from 'three'
+
+// Floating dropship - no ground, transparent background
+function FloatingShip() {
+  const groupRef = useRef()
+  const { scene: shipScene } = useGLTF('/models/space/dropship.gltf')
+
+  useFrame((state) => {
+    if (groupRef.current) {
+      // Gentle floating and rotation
+      groupRef.current.rotation.y = state.clock.elapsedTime * 0.15
+      groupRef.current.position.y = Math.sin(state.clock.elapsedTime * 0.5) * 0.3
+    }
+  })
+
+  return (
+    <group ref={groupRef}>
+      <primitive
+        object={shipScene.clone()}
+        scale={2.5}
+        position={[0, 0, 0]}
+        rotation={[0.1, 0, -0.05]}
+      />
+      {/* Subtle glow underneath */}
+      <mesh position={[0, -1.5, 0]} rotation={[-Math.PI / 2, 0, 0]}>
+        <circleGeometry args={[3, 32]} />
+        <meshBasicMaterial color="#e8a754" transparent opacity={0.1} />
+      </mesh>
+
+      <ambientLight intensity={0.6} color="#ffffff" />
+      <directionalLight position={[5, 10, 5]} intensity={1} color="#ffddaa" />
+      <directionalLight position={[-5, 5, -5]} intensity={0.3} color="#88aaff" />
+    </group>
+  )
+}
+
+// Character running on a grid plane
+function RunningCharacter() {
+  const characterRef = useRef()
+  const { scene: characterScene, animations } = useGLTF('/models/character.glb')
+  const mixerRef = useRef()
+
+  // Setup animation mixer for running
+  React.useEffect(() => {
+    if (animations && animations.length > 0) {
+      mixerRef.current = new THREE.AnimationMixer(characterScene)
+      // Try to find a walk/run animation, fallback to first animation
+      const runAnim = animations.find(a =>
+        a.name.toLowerCase().includes('run') ||
+        a.name.toLowerCase().includes('walk')
+      ) || animations[0]
+      if (runAnim) {
+        const action = mixerRef.current.clipAction(runAnim)
+        action.play()
+      }
+    }
+  }, [animations, characterScene])
+
+  useFrame((state, delta) => {
+    // Update animation
+    if (mixerRef.current) {
+      mixerRef.current.update(delta)
+    }
+
+    if (characterRef.current) {
+      // Move character in a circular path
+      const time = state.clock.elapsedTime * 0.5
+      const radius = 3
+      characterRef.current.position.x = Math.sin(time) * radius
+      characterRef.current.position.z = Math.cos(time) * radius
+
+      // Face direction of movement
+      characterRef.current.rotation.y = time + Math.PI
+
+      // Subtle bobbing while running
+      characterRef.current.position.y = Math.abs(Math.sin(state.clock.elapsedTime * 8)) * 0.05
+    }
+  })
+
+  // Grid size
+  const gridSize = 12
+
+  return (
+    <>
+      {/* Grid plane like in the game */}
+      <group position={[0, -0.01, 0]}>
+        <gridHelper
+          args={[gridSize, gridSize, '#2a3a4a', '#1a2535']}
+        />
+        {/* Solid ground plane */}
+        <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.02, 0]}>
+          <planeGeometry args={[gridSize, gridSize]} />
+          <meshStandardMaterial
+            color="#0d1117"
+            transparent
+            opacity={0.8}
+          />
+        </mesh>
+      </group>
+
+      {/* Running character */}
+      <group ref={characterRef}>
+        <primitive
+          object={characterScene.clone()}
+          scale={2.5}
+          position={[0, 0, 0]}
+        />
+      </group>
+
+      {/* Lighting */}
+      <ambientLight intensity={0.5} color="#8899aa" />
+      <directionalLight position={[5, 10, 5]} intensity={1} color="#ffffff" />
+      <directionalLight position={[-5, 5, -5]} intensity={0.3} color="#7dd3a0" />
+      <pointLight position={[0, 3, 0]} intensity={0.5} color="#7dd3a0" distance={10} />
+    </>
+  )
+}
+
+function LandingPage({ onEnter }) {
+  return (
+    <div style={{
+      background: '#0d1117',
+      color: '#fff',
+      fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
+      overflowX: 'hidden',
+      overflowY: 'auto',
+    }}>
+      {/* Grid background - fixed */}
+      <div style={{
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        backgroundImage: `
+          linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px)
+        `,
+        backgroundSize: '60px 60px',
+        pointerEvents: 'none',
+        zIndex: 0,
+      }} />
+
+      {/* Radial gradient overlay */}
+      <div style={{
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        background: 'radial-gradient(ellipse at 50% 0%, rgba(232, 167, 84, 0.08) 0%, transparent 50%)',
+        pointerEvents: 'none',
+        zIndex: 0,
+      }} />
+
+      {/* Navigation */}
+      <nav style={{
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        right: 0,
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        padding: '20px 60px',
+        zIndex: 100,
+        background: 'linear-gradient(180deg, rgba(13,17,23,0.95) 0%, rgba(13,17,23,0) 100%)',
+      }}>
+        <div style={{
+          fontSize: '24px',
+          fontWeight: '700',
+          color: '#e8a754',
+          letterSpacing: '-0.5px',
+        }}>Claude's World</div>
+        <div style={{ display: 'flex', gap: '40px' }}>
+          <a href="#origin" style={{ color: 'rgba(255,255,255,0.6)', textDecoration: 'none', fontSize: '14px' }}>Origin</a>
+          <a href="#problem" style={{ color: 'rgba(255,255,255,0.6)', textDecoration: 'none', fontSize: '14px' }}>Problem</a>
+          <a href="#solution" style={{ color: 'rgba(255,255,255,0.6)', textDecoration: 'none', fontSize: '14px' }}>Solution</a>
+          <a href="#vision" style={{ color: 'rgba(255,255,255,0.6)', textDecoration: 'none', fontSize: '14px' }}>Vision</a>
+        </div>
+        <button
+          onClick={onEnter}
+          style={{
+            background: 'transparent',
+            border: '1px solid rgba(232, 167, 84, 0.5)',
+            color: '#e8a754',
+            padding: '10px 20px',
+            borderRadius: '8px',
+            fontSize: '14px',
+            cursor: 'pointer',
+          }}
+        >
+          Enter World
+        </button>
+      </nav>
+
+      {/* Hero Section */}
+      <section style={{
+        minHeight: '100vh',
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'center',
+        alignItems: 'center',
+        textAlign: 'center',
+        padding: '120px 20px 60px',
+        position: 'relative',
+        zIndex: 1,
+      }}>
+        <h1 style={{
+          fontSize: 'clamp(36px, 5vw, 64px)',
+          fontWeight: '600',
+          lineHeight: '1.1',
+          marginBottom: '24px',
+        }}>
+          What if you could watch an AI<br />
+          <span style={{ color: '#e8a754' }}>build a world</span>?
+        </h1>
+        <p style={{
+          fontSize: '20px',
+          color: 'rgba(255,255,255,0.6)',
+          marginBottom: '40px',
+        }}>
+          One city. One mind. Every decision visible.
+        </p>
+        <div style={{ display: 'flex', gap: '16px', marginBottom: '80px' }}>
+          <button
+            onClick={onEnter}
+            style={{
+              background: 'linear-gradient(135deg, #e8a754 0%, #d4943f 100%)',
+              border: 'none',
+              color: '#0d1117',
+              padding: '16px 32px',
+              borderRadius: '8px',
+              fontSize: '16px',
+              fontWeight: '600',
+              cursor: 'pointer',
+              boxShadow: '0 4px 20px rgba(232, 167, 84, 0.3)',
+            }}
+          >
+            Enter Simulation
+          </button>
+          <button
+            onClick={() => document.getElementById('origin').scrollIntoView({ behavior: 'smooth' })}
+            style={{
+              background: 'rgba(255,255,255,0.05)',
+              border: '1px solid rgba(255,255,255,0.1)',
+              color: '#fff',
+              padding: '16px 32px',
+              borderRadius: '8px',
+              fontSize: '16px',
+              fontWeight: '500',
+              cursor: 'pointer',
+            }}
+          >
+            Learn More
+          </button>
+        </div>
+
+        <div style={{
+          position: 'absolute',
+          bottom: '40px',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          gap: '8px',
+          color: 'rgba(255,255,255,0.4)',
+          fontSize: '12px',
+          cursor: 'pointer',
+        }}
+        onClick={() => document.getElementById('origin').scrollIntoView({ behavior: 'smooth' })}
+        >
+          <span>Scroll to explore</span>
+          <span style={{ fontSize: '20px', animation: 'bounce 2s infinite' }}>↓</span>
+        </div>
+      </section>
+
+      {/* Origin Story Section with floating 3D Ship */}
+      <section id="origin" style={{
+        minHeight: '100vh',
+        padding: '100px 60px',
+        position: 'relative',
+        zIndex: 1,
+        display: 'flex',
+        alignItems: 'center',
+        gap: '40px',
+      }}>
+        {/* 3D Ship - transparent, hovering */}
+        <div style={{
+          flex: 1.2,
+          height: '600px',
+          position: 'relative',
+        }}>
+          <Canvas
+            camera={{ position: [6, 3, 6], fov: 50 }}
+            style={{ background: 'transparent' }}
+            gl={{ alpha: true }}
+          >
+            <Suspense fallback={null}>
+              <FloatingShip />
+              <OrbitControls
+                enableZoom={false}
+                enablePan={false}
+                autoRotate={false}
+                minPolarAngle={Math.PI / 3}
+                maxPolarAngle={Math.PI / 2}
+              />
+            </Suspense>
+          </Canvas>
+        </div>
+
+        {/* Story text */}
+        <div style={{ flex: 1 }}>
+          <p style={{
+            fontSize: '12px',
+            color: '#e8a754',
+            letterSpacing: '2px',
+            marginBottom: '16px',
+          }}>THE ORIGIN</p>
+
+          <h2 style={{
+            fontSize: 'clamp(28px, 3vw, 40px)',
+            fontWeight: '600',
+            marginBottom: '24px',
+            lineHeight: '1.2',
+          }}>
+            Claude crashed on an<br />
+            <span style={{ color: '#7dd3a0' }}>empty planet</span>.
+          </h2>
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+            <p style={{ fontSize: '15px', color: 'rgba(255,255,255,0.7)', lineHeight: '1.8' }}>
+              No instructions. No map. Just an AI with a mission: <em style={{ color: '#fff' }}>survive and build</em>.
+            </p>
+            <p style={{ fontSize: '15px', color: 'rgba(255,255,255,0.6)', lineHeight: '1.8' }}>
+              Watch as Claude surveys the barren landscape, makes decisions about what to build first, and slowly transforms nothing into a thriving colony.
+            </p>
+            <p style={{ fontSize: '15px', color: 'rgba(255,255,255,0.5)', lineHeight: '1.8' }}>
+              Every structure has a reason. Every choice reveals how an AI thinks.
+            </p>
+
+            <div style={{
+              display: 'flex',
+              gap: '24px',
+              marginTop: '16px',
+            }}>
+              <div style={{
+                padding: '16px 20px',
+                background: 'rgba(125, 211, 160, 0.1)',
+                borderRadius: '8px',
+                borderLeft: '3px solid #7dd3a0',
+              }}>
+                <div style={{ fontSize: '24px', fontWeight: '600', color: '#7dd3a0' }}>Day 1</div>
+                <div style={{ fontSize: '12px', color: 'rgba(255,255,255,0.5)' }}>The crash</div>
+              </div>
+              <div style={{
+                padding: '16px 20px',
+                background: 'rgba(232, 167, 84, 0.1)',
+                borderRadius: '8px',
+                borderLeft: '3px solid #e8a754',
+              }}>
+                <div style={{ fontSize: '24px', fontWeight: '600', color: '#e8a754' }}>Day ???</div>
+                <div style={{ fontSize: '12px', color: 'rgba(255,255,255,0.5)' }}>Your arrival</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Meet Claude Section with Character */}
+      <section style={{
+        padding: '100px 60px',
+        position: 'relative',
+        zIndex: 1,
+        display: 'flex',
+        alignItems: 'center',
+        gap: '40px',
+      }}>
+        {/* Text first */}
+        <div style={{ flex: 1 }}>
+          <p style={{
+            fontSize: '12px',
+            color: '#7dd3a0',
+            letterSpacing: '2px',
+            marginBottom: '16px',
+          }}>MEET THE BUILDER</p>
+
+          <h2 style={{
+            fontSize: 'clamp(28px, 3vw, 40px)',
+            fontWeight: '600',
+            marginBottom: '24px',
+            lineHeight: '1.2',
+          }}>
+            This is <span style={{ color: '#e8a754' }}>Claude</span>.
+          </h2>
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+            <p style={{ fontSize: '15px', color: 'rgba(255,255,255,0.7)', lineHeight: '1.8' }}>
+              An AI with a personality. Watch it think, plan, and build in real-time.
+            </p>
+            <p style={{ fontSize: '15px', color: 'rgba(255,255,255,0.6)', lineHeight: '1.8' }}>
+              Claude names neighborhoods after constellations. It gets philosophical about construction. It has good days and tired days.
+            </p>
+            <p style={{ fontSize: '15px', color: 'rgba(255,255,255,0.5)', lineHeight: '1.8' }}>
+              This isn't a faceless system. It's a character you can follow, understand, and observe.
+            </p>
+
+            <div style={{
+              marginTop: '16px',
+              padding: '20px',
+              background: 'rgba(125, 211, 160, 0.05)',
+              borderRadius: '12px',
+              border: '1px solid rgba(125, 211, 160, 0.1)',
+            }}>
+              <p style={{ fontSize: '14px', color: 'rgba(255,255,255,0.6)', fontStyle: 'italic', lineHeight: '1.7' }}>
+                "Someone's going to call this home. That's beautiful."
+              </p>
+              <p style={{ fontSize: '12px', color: '#7dd3a0', marginTop: '8px' }}>— Claude, building residential quarters</p>
+            </div>
+          </div>
+        </div>
+
+        {/* 3D Character running on grid */}
+        <div style={{
+          flex: 1,
+          height: '500px',
+          position: 'relative',
+        }}>
+          <Canvas
+            camera={{ position: [8, 6, 8], fov: 45 }}
+            style={{ background: 'transparent' }}
+            gl={{ alpha: true }}
+          >
+            <Suspense fallback={null}>
+              <RunningCharacter />
+              <OrbitControls
+                enableZoom={false}
+                enablePan={false}
+                autoRotate
+                autoRotateSpeed={0.5}
+                minPolarAngle={Math.PI / 4}
+                maxPolarAngle={Math.PI / 2.5}
+              />
+            </Suspense>
+          </Canvas>
+        </div>
+      </section>
+
+      {/* Problem Section */}
+      <section id="problem" style={{ padding: '120px 60px', position: 'relative', zIndex: 1 }}>
+        <h2 style={{
+          fontSize: 'clamp(32px, 4vw, 48px)',
+          fontWeight: '600',
+          textAlign: 'center',
+          marginBottom: '8px',
+        }}>
+          AI is <span style={{ color: '#e8a754' }}>invisible</span>.
+        </h2>
+        <h2 style={{
+          fontSize: 'clamp(32px, 4vw, 48px)',
+          fontWeight: '600',
+          textAlign: 'center',
+          marginBottom: '8px',
+        }}>
+          AI is <span style={{ color: '#c9a0dc' }}>abstract</span>.
+        </h2>
+        <h2 style={{
+          fontSize: 'clamp(32px, 4vw, 48px)',
+          fontWeight: '600',
+          textAlign: 'center',
+          marginBottom: '60px',
+          color: '#7dd3a0',
+        }}>
+          Zero intuition.
+        </h2>
+
+        <div style={{
+          display: 'flex',
+          gap: '40px',
+          maxWidth: '900px',
+          margin: '0 auto',
+          alignItems: 'center',
+        }}>
+          {/* Terminal mockup */}
+          <div style={{
+            flex: 1,
+            background: 'linear-gradient(135deg, rgba(26, 31, 46, 0.9) 0%, rgba(20, 25, 35, 0.9) 100%)',
+            border: '1px solid rgba(255,255,255,0.08)',
+            borderRadius: '12px',
+            padding: '20px',
+          }}>
+            <div style={{ display: 'flex', gap: '6px', marginBottom: '16px' }}>
+              <span style={{ width: '12px', height: '12px', borderRadius: '50%', background: '#ff5f57' }} />
+              <span style={{ width: '12px', height: '12px', borderRadius: '50%', background: '#ffbd2e' }} />
+              <span style={{ width: '12px', height: '12px', borderRadius: '50%', background: '#28ca41' }} />
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '8px' }}>
+              {[...Array(6)].map((_, i) => (
+                <div key={i} style={{
+                  background: 'rgba(255,255,255,0.04)',
+                  borderRadius: '4px',
+                  padding: '16px 12px',
+                }}>
+                  <div style={{ height: '8px', background: 'rgba(255,255,255,0.15)', borderRadius: '2px', marginBottom: '8px', width: '85%' }} />
+                  <div style={{ height: '8px', background: 'rgba(255,255,255,0.08)', borderRadius: '2px', width: '60%' }} />
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Description */}
+          <div style={{ flex: 1 }}>
+            <p style={{ fontSize: '15px', color: 'rgba(255,255,255,0.7)', lineHeight: '1.8', marginBottom: '16px' }}>
+              AI systems are powerful. But to understand them, you read logs, parse JSON, stare at dashboards.
+            </p>
+            <p style={{ fontSize: '15px', color: 'rgba(255,255,255,0.5)', lineHeight: '1.8', marginBottom: '24px' }}>
+              What about actually <em>seeing</em> what AI does?
+            </p>
+            <p style={{ fontSize: '15px', fontWeight: '600', color: '#fff', lineHeight: '1.8' }}>
+              At scale, text interfaces break down.
+            </p>
+            <p style={{ marginTop: '20px', color: '#e8a754', fontSize: '14px' }}>
+              There has to be a better way.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {/* Core Question */}
+      <section style={{ padding: '80px 60px', position: 'relative', zIndex: 1, textAlign: 'center' }}>
+        <p style={{ fontSize: '14px', color: 'rgba(255,255,255,0.4)', marginBottom: '16px' }}>The core question:</p>
+        <h2 style={{ fontSize: 'clamp(28px, 4vw, 44px)', fontWeight: '600', marginBottom: '40px' }}>
+          How do you give a human <span style={{ color: '#7dd3a0' }}>intuitive<br />understanding</span> of AI decisions?
+        </h2>
+        <div style={{
+          width: '60px',
+          height: '3px',
+          background: 'linear-gradient(90deg, #7dd3a0, transparent)',
+          margin: '0 auto',
+        }} />
+      </section>
+
+      {/* Solution Section */}
+      <section id="solution" style={{ padding: '80px 60px', position: 'relative', zIndex: 1 }}>
+        <p style={{ fontSize: '14px', color: '#7dd3a0', textAlign: 'center', marginBottom: '16px' }}>A spatial interface</p>
+        <p style={{ fontSize: '16px', color: 'rgba(255,255,255,0.6)', textAlign: 'center', maxWidth: '700px', margin: '0 auto 60px', lineHeight: '1.7' }}>
+          A 3D environment where AI exists as a character you can see, follow, and understand.
+        </p>
+
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(3, 1fr)',
+          gap: '24px',
+          maxWidth: '900px',
+          margin: '0 auto 40px',
+        }}>
+          {[
+            { icon: '◇', title: 'Spatial Understanding', desc: 'See AI decisions at a glance. Know instantly what it\'s doing.' },
+            { icon: '◎', title: 'Intuitive Observation', desc: 'Watch. Explore. No command line gymnastics required.' },
+            { icon: '◈', title: 'Strategic Overview', desc: 'Know where AI attention is. See the big picture.' },
+          ].map((item, i) => (
+            <div key={i} style={{
+              background: 'linear-gradient(135deg, rgba(26, 31, 46, 0.8) 0%, rgba(20, 25, 35, 0.8) 100%)',
+              border: '1px solid rgba(255,255,255,0.06)',
+              borderRadius: '12px',
+              padding: '28px',
+              textAlign: 'center',
+            }}>
+              <div style={{
+                width: '48px',
+                height: '48px',
+                borderRadius: '10px',
+                background: 'rgba(125, 211, 160, 0.1)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                margin: '0 auto 20px',
+                color: '#7dd3a0',
+                fontSize: '20px',
+              }}>{item.icon}</div>
+              <h3 style={{ fontSize: '16px', fontWeight: '600', marginBottom: '12px' }}>{item.title}</h3>
+              <p style={{ fontSize: '13px', color: 'rgba(255,255,255,0.5)', lineHeight: '1.6' }}>{item.desc}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* Vision Section */}
+      <section id="vision" style={{ padding: '100px 60px', position: 'relative', zIndex: 1 }}>
+        <h2 style={{ fontSize: 'clamp(28px, 4vw, 44px)', fontWeight: '600', textAlign: 'center', marginBottom: '16px' }}>
+          The <span style={{ color: '#7dd3a0' }}>vision</span>
+        </h2>
+        <p style={{ fontSize: '15px', color: 'rgba(255,255,255,0.5)', textAlign: 'center', maxWidth: '650px', margin: '0 auto 50px' }}>
+          Imagine watching AI build a civilization. Every decision manifests in the world.
+        </p>
+
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(3, 1fr)',
+          gap: '24px',
+          maxWidth: '1000px',
+          margin: '0 auto 40px',
+        }}>
+          {[
+            { num: '1', title: 'Enter the World', desc: 'Drop into a 3D environment where Claude is building a space colony from scratch.' },
+            { num: '2', title: 'Watch It Think', desc: 'See Claude\'s thoughts in real-time. Read its reasoning. Understand its personality.' },
+            { num: '3', title: 'Understand AI', desc: 'See patterns emerge. Watch priorities shift. Witness intelligence in action.', highlight: true },
+          ].map((item, i) => (
+            <div key={i} style={{
+              background: item.highlight
+                ? 'linear-gradient(135deg, rgba(26, 31, 46, 0.9) 0%, rgba(20, 25, 35, 0.9) 100%)'
+                : 'linear-gradient(135deg, rgba(26, 31, 46, 0.8) 0%, rgba(20, 25, 35, 0.8) 100%)',
+              border: item.highlight ? '1px solid rgba(125, 211, 160, 0.2)' : '1px solid rgba(255,255,255,0.06)',
+              borderRadius: '12px',
+              padding: '28px',
+              boxShadow: item.highlight ? '0 0 40px rgba(125, 211, 160, 0.08)' : 'none',
+            }}>
+              <div style={{
+                width: '36px',
+                height: '36px',
+                borderRadius: '50%',
+                background: 'rgba(125, 211, 160, 0.15)',
+                color: '#7dd3a0',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: '14px',
+                fontWeight: '600',
+                marginBottom: '16px',
+              }}>{item.num}</div>
+              <h3 style={{ fontSize: '16px', fontWeight: '600', marginBottom: '12px' }}>{item.title}</h3>
+              <p style={{ fontSize: '13px', color: 'rgba(255,255,255,0.5)', lineHeight: '1.6' }}>{item.desc}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* CTA Section */}
+      <section style={{ padding: '100px 60px', textAlign: 'center', position: 'relative', zIndex: 1 }}>
+        <h2 style={{ fontSize: 'clamp(28px, 4vw, 44px)', fontWeight: '600', marginBottom: '24px' }}>
+          Ready to see AI <span style={{ color: '#e8a754' }}>think</span>?
+        </h2>
+        <button
+          onClick={onEnter}
+          style={{
+            background: 'linear-gradient(135deg, #e8a754 0%, #d4943f 100%)',
+            border: 'none',
+            color: '#0d1117',
+            padding: '18px 48px',
+            borderRadius: '8px',
+            fontSize: '18px',
+            fontWeight: '600',
+            cursor: 'pointer',
+            boxShadow: '0 4px 30px rgba(232, 167, 84, 0.3)',
+          }}
+        >
+          Enter Claude's World
+        </button>
+      </section>
+
+      {/* Footer */}
+      <footer style={{
+        padding: '40px 60px',
+        borderTop: '1px solid rgba(255,255,255,0.05)',
+        textAlign: 'center',
+        color: 'rgba(255,255,255,0.4)',
+        fontSize: '14px',
+        position: 'relative',
+        zIndex: 1,
+      }}>
+        <p>Claude's World — An experiment in visible AI</p>
+        <p style={{ marginTop: '8px', fontSize: '12px' }}>
+          Built with curiosity. Powered by Claude.
+        </p>
+      </footer>
+
+      {/* CSS Animation */}
+      <style>{`
+        @keyframes bounce {
+          0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+          40% { transform: translateY(-10px); }
+          60% { transform: translateY(-5px); }
+        }
+        html {
+          scroll-behavior: smooth;
+        }
+      `}</style>
+    </div>
+  )
+}
+
+export default LandingPage

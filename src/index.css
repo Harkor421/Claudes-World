@@ -6,9 +6,16 @@
 
 html, body, #root {
   width: 100%;
+  min-height: 100%;
+  background: #0d1117;
+}
+
+/* When game canvas is active, need full height chain for Three.js Canvas */
+html.game-active,
+html.game-active body,
+html.game-active #root {
   height: 100%;
   overflow: hidden;
-  background: #2a2a4a;
 }
 
 /* Character name label */

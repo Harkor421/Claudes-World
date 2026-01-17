@@ -4,12 +4,8 @@ import { gameSocket } from '../services/socket'
 
 export function useAIBrain() {
   const isConnected = useRef(false)
-  const lastSyncTime = useRef(0)
 
   // Get store values and actions
-  const timeOfDay = useGameStore((state) => state.timeOfDay)
-  const placedBuildings = useGameStore((state) => state.placedBuildings)
-  const weather = useGameStore((state) => state.weather)
   const adminMode = useGameStore((state) => state.adminMode)
 
   const startBuildTask = useGameStore((state) => state.startBuildTask)
@@ -25,6 +21,9 @@ export function useAIBrain() {
   const setAICurrentAction = useGameStore((state) => state.setAICurrentAction)
   const addPlacedBuilding = useGameStore((state) => state.addPlacedBuilding)
   const incrementBuildingsToday = useGameStore((state) => state.incrementBuildingsToday)
+  const setTimeOfDay = useGameStore((state) => state.setTimeOfDay)
+  const setDay = useGameStore((state) => state.setDay)
+  const addLogEntry = useGameStore((state) => state.addLogEntry)
 
   // Handle AI actions from server
   const handleAIAction = useCallback((payload) => {
@@ -115,10 +114,29 @@ export function useAIBrain() {
         incrementBuildingsToday() // Track for daily stats
         break
 
+      case 'LOG_ENTRY':
+        // Claude's logbook entry with AI-generated thoughts
+        console.log('Claude thinks:', payload.data.thought)
+        addLogEntry({
+          action: payload.data.action,
+          model: payload.data.model,
+          name: payload.data.name,
+          reason: payload.data.reason,
+          thought: payload.data.thought,
+          mood: payload.data.mood,
+          buildingType: payload.data.buildingType,
+          position: payload.data.position,
+          citySize: payload.data.citySize,
+          totalBuildings: payload.data.totalBuildings,
+          population: payload.data.population,
+          neighborhoods: payload.data.neighborhoods,
+        })
+        break
+
       default:
         console.log('Unknown AI action:', payload)
     }
-  }, [startBuildTask, adjustMood, adjustEnergy, setCharacterTargetPosition, setIsSleeping, adminMode, setAIStatus, setAICurrentAction, addPlacedBuilding, incrementBuildingsToday])
+  }, [startBuildTask, adjustMood, adjustEnergy, setCharacterTargetPosition, setIsSleeping, adminMode, setAIStatus, setAICurrentAction, addPlacedBuilding, incrementBuildingsToday, addLogEntry])
 
   // Handle full state from server (for reconnection/persistence)
   const handleWorldState = useCallback((payload) => {
@@ -135,12 +153,30 @@ export function useAIBrain() {
     if (moving !== undefined) setIsMoving(moving)
   }, [setCharacterPosition, setCharacterRotation, setIsMoving])
 
+  // Handle time updates from server (server is source of truth for time)
+  const handleTimeUpdate = useCallback((payload) => {
+    const { timeOfDay: newTime, day: newDay } = payload
+    setTimeOfDay(newTime)
+    if (newDay !== undefined) setDay(newDay)
+  }, [setTimeOfDay, setDay])
+
+  // Handle direct building placed messages (for sync between clients)
+  const handleBuildingPlaced = useCallback((payload) => {
+    // payload is the building directly (not wrapped in data)
+    if (payload && payload.id) {
+      addPlacedBuilding(payload)
+      incrementBuildingsToday()
+    }
+  }, [addPlacedBuilding, incrementBuildingsToday])
+
   // Connect to server on mount
   useEffect(() => {
     // Listen for AI actions
     gameSocket.on('AI_ACTION', handleAIAction)
     gameSocket.on('WORLD_STATE', handleWorldState)
     gameSocket.on('CHARACTER_POSITION', handleCharacterPosition)
+    gameSocket.on('TIME_UPDATE', handleTimeUpdate)
+    gameSocket.on('BUILDING_PLACED', handleBuildingPlaced)
 
     gameSocket.on('connected', () => {
       isConnected.current = true
@@ -161,32 +197,15 @@ export function useAIBrain() {
       gameSocket.off('AI_ACTION', handleAIAction)
       gameSocket.off('WORLD_STATE', handleWorldState)
       gameSocket.off('CHARACTER_POSITION', handleCharacterPosition)
+      gameSocket.off('TIME_UPDATE', handleTimeUpdate)
+      gameSocket.off('BUILDING_PLACED', handleBuildingPlaced)
       gameSocket.disconnect()
     }
-  }, [handleAIAction, handleWorldState, handleCharacterPosition])
+  }, [handleAIAction, handleWorldState, handleCharacterPosition, handleTimeUpdate, handleBuildingPlaced])
 
-  // Sync time updates to server (throttled)
-  useEffect(() => {
-    const now = Date.now()
-    // Only sync every 500ms to avoid flooding
-    if (now - lastSyncTime.current > 500) {
-      lastSyncTime.current = now
-      gameSocket.updateTime(timeOfDay)
-    }
-  }, [timeOfDay])
-
+  // Note: Time is now managed by the server - we receive TIME_UPDATE messages
   // Note: Character position sync is handled in Character.jsx to avoid duplicate syncing
-
-  // Sync when buildings change
-  useEffect(() => {
-    if (isConnected.current) {
-      gameSocket.syncState({
-        placedBuildings,
-        timeOfDay,
-        weather,
-      })
-    }
-  }, [placedBuildings, timeOfDay, weather])
+  // Note: Buildings are now managed by server - clients receive BUILDING_PLACED messages
 
   // Manual trigger for AI thinking
   const requestAIAction = useCallback(() => {

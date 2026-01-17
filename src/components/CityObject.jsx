@@ -4,11 +4,6 @@ import { useFrame } from '@react-three/fiber'
 import * as THREE from 'three'
 import { useGameStore } from '../store/gameStore'
 
-// Check if it's nighttime (windows and lights should be on)
-const isNightTime = (timeOfDay) => {
-  return timeOfDay < 6 || timeOfDay > 18
-}
-
 // Get light intensity based on time (smooth transition)
 const getLightIntensity = (timeOfDay) => {
   if (timeOfDay >= 6 && timeOfDay <= 7) {
@@ -108,16 +103,8 @@ function CityObject({
 
   const lightIntensity = getLightIntensity(timeOfDay)
 
-  // Building window light positions (simulate light coming from windows)
-  const buildingLights = useMemo(() => {
-    if (!isBuilding) return []
-    // Add a few window lights at different heights
-    return [
-      { pos: [0.3, 1.2, 0.3], color: '#ffdd99' },
-      { pos: [-0.3, 2.0, 0.3], color: '#ffcc77' },
-      { pos: [0.2, 1.6, -0.3], color: '#ffeebb' },
-    ]
-  }, [isBuilding])
+  // Building lights removed to prevent shader uniform overflow with large cities
+  // Window glow is now handled purely through emissive materials in useFrame
 
   return (
     <group ref={groupRef} position={position} rotation={rotation}>
@@ -125,36 +112,13 @@ function CityObject({
         object={clonedScene}
         scale={scale}
       />
-      {/* Add point light for streetlights */}
+      {/* Streetlight bulb glow effect (no point light to save uniforms) */}
       {isStreetlight && lightIntensity > 0 && (
-        <>
-          <pointLight
-            position={[lightOffset[0] * scale, lightOffset[1] * scale, lightOffset[2] * scale]}
-            color="#ffcc77"
-            intensity={lightIntensity * 3}
-            distance={8 * scale}
-            decay={2}
-            castShadow={false}
-          />
-          {/* Small glowing bulb effect */}
-          <mesh position={[lightOffset[0] * scale, lightOffset[1] * scale, lightOffset[2] * scale]}>
-            <sphereGeometry args={[0.028 * scale, 8, 8]} />
-            <meshBasicMaterial color="#ffdd88" transparent opacity={lightIntensity * 0.9} />
-          </mesh>
-        </>
+        <mesh position={[lightOffset[0] * scale, lightOffset[1] * scale, lightOffset[2] * scale]}>
+          <sphereGeometry args={[0.04 * scale, 6, 6]} />
+          <meshBasicMaterial color="#ffdd88" transparent opacity={lightIntensity * 0.9} />
+        </mesh>
       )}
-      {/* Add window lights for buildings at night */}
-      {isBuilding && lightIntensity > 0 && buildingLights.map((light, i) => (
-        <pointLight
-          key={i}
-          position={[light.pos[0] * scale, light.pos[1] * scale, light.pos[2] * scale]}
-          color={light.color}
-          intensity={lightIntensity * 1.5}
-          distance={4 * scale}
-          decay={2}
-          castShadow={false}
-        />
-      ))}
     </group>
   )
 }
