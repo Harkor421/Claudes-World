@@ -1,7 +1,8 @@
-import React, { Suspense, useRef } from 'react'
+import React, { Suspense, useRef, useMemo, useEffect, useState } from 'react'
 import { Canvas, useFrame } from '@react-three/fiber'
-import { OrbitControls, useGLTF } from '@react-three/drei'
+import { OrbitControls, useGLTF, useAnimations } from '@react-three/drei'
 import * as THREE from 'three'
+import { SkeletonUtils } from 'three-stdlib'
 
 // Floating dropship - no ground, transparent background
 function FloatingShip() {
@@ -37,77 +38,164 @@ function FloatingShip() {
   )
 }
 
-// Character running on a grid plane
-function RunningCharacter() {
-  const characterRef = useRef()
-  const { scene: characterScene, animations } = useGLTF('/models/character.glb')
-  const mixerRef = useRef()
+// Dust particle for trail effect
+function DustParticle({ startPosition, delay }) {
+  const meshRef = useRef()
+  const [opacity, setOpacity] = useState(0)
+  const startTime = useRef(null)
 
-  // Setup animation mixer for running
-  React.useEffect(() => {
-    if (animations && animations.length > 0) {
-      mixerRef.current = new THREE.AnimationMixer(characterScene)
-      // Try to find a walk/run animation, fallback to first animation
-      const runAnim = animations.find(a =>
-        a.name.toLowerCase().includes('run') ||
-        a.name.toLowerCase().includes('walk')
-      ) || animations[0]
-      if (runAnim) {
-        const action = mixerRef.current.clipAction(runAnim)
-        action.play()
+  useFrame((state) => {
+    if (!meshRef.current) return
+
+    if (!startTime.current) {
+      startTime.current = state.clock.elapsedTime + delay
+    }
+
+    const elapsed = state.clock.elapsedTime - startTime.current
+    if (elapsed < 0) return
+
+    // Particle lifetime ~1 second
+    const life = elapsed / 1.2
+    if (life > 1) {
+      meshRef.current.visible = false
+      return
+    }
+
+    meshRef.current.visible = true
+    // Rise and spread
+    meshRef.current.position.y = startPosition[1] + elapsed * 0.3
+    meshRef.current.position.x = startPosition[0] + (Math.random() - 0.5) * 0.1
+    meshRef.current.position.z = startPosition[2] + (Math.random() - 0.5) * 0.1
+
+    // Scale up slightly
+    const scale = 0.08 + life * 0.15
+    meshRef.current.scale.setScalar(scale)
+
+    // Fade out
+    setOpacity((1 - life) * 0.4)
+  })
+
+  return (
+    <mesh ref={meshRef} position={startPosition} visible={false}>
+      <sphereGeometry args={[1, 8, 8]} />
+      <meshBasicMaterial color="#8b7355" transparent opacity={opacity} />
+    </mesh>
+  )
+}
+
+// Character running on a grid plane with proper animations
+function RunningCharacter() {
+  const groupRef = useRef()
+  const modelRef = useRef()
+  const [dustParticles, setDustParticles] = useState([])
+  const lastDustTime = useRef(0)
+  const dustIdRef = useRef(0)
+
+  // Load character model
+  const characterGltf = useGLTF('/models/character.glb')
+
+  // Load animation files (same as main game)
+  const movementGltf = useGLTF('/models/Rig_Medium_MovementBasic.glb')
+  const generalGltf = useGLTF('/models/Rig_Medium_General.glb')
+
+  // Combine all animations
+  const allAnimations = useMemo(() => {
+    return [...movementGltf.animations, ...generalGltf.animations]
+  }, [movementGltf.animations, generalGltf.animations])
+
+  // Clone the character scene
+  const clonedScene = useMemo(() => {
+    const clone = SkeletonUtils.clone(characterGltf.scene)
+    clone.traverse((child) => {
+      if (child.isMesh) {
+        child.castShadow = true
+        child.receiveShadow = true
+      }
+    })
+    return clone
+  }, [characterGltf.scene])
+
+  // Set up animations
+  const { actions, mixer } = useAnimations(allAnimations, modelRef)
+
+  // Start walking animation
+  useEffect(() => {
+    if (actions) {
+      // Use Walking_A animation
+      const walkAction = actions['Walking_A']
+      if (walkAction) {
+        walkAction.reset().fadeIn(0.2).play()
+        walkAction.setLoop(THREE.LoopRepeat)
+        // Speed up the animation slightly for running feel
+        walkAction.timeScale = 1.3
       }
     }
-  }, [animations, characterScene])
+  }, [actions])
 
   useFrame((state, delta) => {
-    // Update animation
-    if (mixerRef.current) {
-      mixerRef.current.update(delta)
-    }
+    // Update animation mixer
+    if (mixer) mixer.update(delta)
 
-    if (characterRef.current) {
-      // Move character in a circular path
-      const time = state.clock.elapsedTime * 0.5
-      const radius = 3
-      characterRef.current.position.x = Math.sin(time) * radius
-      characterRef.current.position.z = Math.cos(time) * radius
+    if (groupRef.current) {
+      // Stay in the center
+      groupRef.current.position.x = 0
+      groupRef.current.position.z = 0
+      groupRef.current.position.y = 0
 
-      // Face direction of movement
-      characterRef.current.rotation.y = time + Math.PI
+      // Face forward (no rotation) - camera orbits around him
+      groupRef.current.rotation.y = 0
 
-      // Subtle bobbing while running
-      characterRef.current.position.y = Math.abs(Math.sin(state.clock.elapsedTime * 8)) * 0.05
+      // Spawn dust particles periodically behind character's feet
+      const now = state.clock.elapsedTime
+      if (now - lastDustTime.current > 0.12) {
+        lastDustTime.current = now
+        dustIdRef.current++
+
+        // Add dust particle behind character (negative z) with slight random offset
+        const offsetX = (Math.random() - 0.5) * 0.2
+        const offsetZ = -0.2 + (Math.random() - 0.5) * 0.15
+        setDustParticles(prev => {
+          const newParticles = [...prev, {
+            id: dustIdRef.current,
+            position: [offsetX, 0.02, offsetZ],
+            delay: 0
+          }]
+          // Keep only last 20 particles
+          return newParticles.slice(-20)
+        })
+      }
     }
   })
 
-  // Grid size
-  const gridSize = 12
+  // Grid size - smaller and more subtle
+  const gridSize = 6
 
   return (
     <>
-      {/* Grid plane like in the game */}
+      {/* Grid plane like in the game - gray tones */}
       <group position={[0, -0.01, 0]}>
-        <gridHelper
-          args={[gridSize, gridSize, '#2a3a4a', '#1a2535']}
-        />
+        <gridHelper args={[gridSize, 8, '#444444', '#333333']} />
         {/* Solid ground plane */}
         <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.02, 0]}>
           <planeGeometry args={[gridSize, gridSize]} />
-          <meshStandardMaterial
-            color="#0d1117"
-            transparent
-            opacity={0.8}
-          />
+          <meshStandardMaterial color="#1a1a1a" transparent opacity={0.9} />
         </mesh>
       </group>
 
-      {/* Running character */}
-      <group ref={characterRef}>
-        <primitive
-          object={characterScene.clone()}
-          scale={2.5}
-          position={[0, 0, 0]}
+      {/* Dust trail particles */}
+      {dustParticles.map(particle => (
+        <DustParticle
+          key={particle.id}
+          startPosition={particle.position}
+          delay={particle.delay}
         />
+      ))}
+
+      {/* Running character */}
+      <group ref={groupRef}>
+        <group ref={modelRef} scale={2}>
+          <primitive object={clonedScene} />
+        </group>
       </group>
 
       {/* Lighting */}
@@ -118,6 +206,11 @@ function RunningCharacter() {
     </>
   )
 }
+
+// Preload models for landing page
+useGLTF.preload('/models/character.glb')
+useGLTF.preload('/models/Rig_Medium_MovementBasic.glb')
+useGLTF.preload('/models/Rig_Medium_General.glb')
 
 function LandingPage({ onEnter }) {
   return (
