@@ -90,6 +90,7 @@ function HUD({ onHome }) {
     <>
       {/* Home Button - Top Left */}
       <button
+        className="hud-home-btn"
         onClick={onHome}
         onMouseEnter={() => setHomeHovered(true)}
         onMouseLeave={() => setHomeHovered(false)}
@@ -135,7 +136,7 @@ function HUD({ onHome }) {
       </button>
 
       {/* Top Bar - Time & Stats */}
-      <div style={{
+      <div className="hud-top-bar" style={{
         position: 'fixed',
         top: '16px',
         left: '50%',
@@ -149,67 +150,56 @@ function HUD({ onHome }) {
         fontFamily: 'system-ui, -apple-system, sans-serif',
       }}>
         {/* Day */}
-        <div style={{ textAlign: 'center' }}>
-          <div style={{ fontSize: '10px', color: 'rgba(255,255,255,0.4)', letterSpacing: '1px', marginBottom: '2px' }}>DAY</div>
-          <div style={{ fontSize: '20px', fontWeight: '600', color: '#7dd3fc' }}>{day}</div>
+        <div className="hud-stat" style={{ textAlign: 'center' }}>
+          <div className="hud-stat-label" style={{ fontSize: '10px', color: 'rgba(255,255,255,0.4)', letterSpacing: '1px', marginBottom: '2px' }}>DAY</div>
+          <div className="hud-stat-value" style={{ fontSize: '20px', fontWeight: '600', color: '#7dd3fc' }}>{day}</div>
         </div>
 
         {/* Divider */}
-        <div style={{ width: '1px', height: '36px', background: 'rgba(255,255,255,0.1)' }} />
+        <div className="hud-divider" style={{ width: '1px', height: '36px', background: 'rgba(255,255,255,0.1)' }} />
 
         {/* Time */}
-        <div style={{ textAlign: 'center' }}>
-          <div style={{ fontSize: '10px', color: 'rgba(255,255,255,0.4)', letterSpacing: '1px', marginBottom: '2px' }}>{getTimePeriod(timeOfDay).toUpperCase()}</div>
-          <div style={{ fontSize: '20px', fontWeight: '300', color: '#fff', letterSpacing: '-0.5px' }}>{formatTime(timeOfDay)}</div>
+        <div className="hud-stat" style={{ textAlign: 'center' }}>
+          <div className="hud-stat-label" style={{ fontSize: '10px', color: 'rgba(255,255,255,0.4)', letterSpacing: '1px', marginBottom: '2px' }}>{getTimePeriod(timeOfDay).toUpperCase()}</div>
+          <div className="hud-stat-value" style={{ fontSize: '20px', fontWeight: '300', color: '#fff', letterSpacing: '-0.5px' }}>{formatTime(timeOfDay)}</div>
         </div>
 
         {/* Divider */}
-        <div style={{ width: '1px', height: '36px', background: 'rgba(255,255,255,0.1)' }} />
+        <div className="hud-divider" style={{ width: '1px', height: '36px', background: 'rgba(255,255,255,0.1)' }} />
 
         {/* City Status */}
-        <div style={{ textAlign: 'center' }}>
-          <div style={{ fontSize: '10px', color: 'rgba(255,255,255,0.4)', letterSpacing: '1px', marginBottom: '2px' }}>{getCitySizeLabel(citySize).toUpperCase()}</div>
-          <div style={{ fontSize: '16px', fontWeight: '500', color: '#7dd3a0' }}>
-            {placedBuildings.length} <span style={{ fontSize: '10px', color: 'rgba(255,255,255,0.4)' }}>buildings</span>
+        <div className="hud-stat" style={{ textAlign: 'center' }}>
+          <div className="hud-stat-label" style={{ fontSize: '10px', color: 'rgba(255,255,255,0.4)', letterSpacing: '1px', marginBottom: '2px' }}>{getCitySizeLabel(citySize).toUpperCase()}</div>
+          <div className="hud-stat-value" style={{ fontSize: '16px', fontWeight: '500', color: '#7dd3a0' }}>
+            {placedBuildings.length}
           </div>
         </div>
 
         {/* Divider */}
-        <div style={{ width: '1px', height: '36px', background: 'rgba(255,255,255,0.1)' }} />
+        <div className="hud-divider" style={{ width: '1px', height: '36px', background: 'rgba(255,255,255,0.1)' }} />
 
         {/* Population */}
-        <div style={{ textAlign: 'center' }}>
-          <div style={{ fontSize: '10px', color: 'rgba(255,255,255,0.4)', letterSpacing: '1px', marginBottom: '2px' }}>POPULATION</div>
-          <div style={{ fontSize: '16px', fontWeight: '500', color: '#f0c674' }}>
+        <div className="hud-stat" style={{ textAlign: 'center' }}>
+          <div className="hud-stat-label" style={{ fontSize: '10px', color: 'rgba(255,255,255,0.4)', letterSpacing: '1px', marginBottom: '2px' }}>POP</div>
+          <div className="hud-stat-value" style={{ fontSize: '16px', fontWeight: '500', color: '#f0c674' }}>
             {population.toLocaleString()}
           </div>
         </div>
 
         {/* Divider */}
-        <div style={{ width: '1px', height: '36px', background: 'rgba(255,255,255,0.1)' }} />
-
-        {/* Neighborhoods */}
-        <div style={{ textAlign: 'center' }}>
-          <div style={{ fontSize: '10px', color: 'rgba(255,255,255,0.4)', letterSpacing: '1px', marginBottom: '2px' }}>DISTRICTS</div>
-          <div style={{ fontSize: '16px', fontWeight: '500', color: '#c9a0dc' }}>
-            {neighborhoods}
-          </div>
-        </div>
-
-        {/* Divider */}
-        <div style={{ width: '1px', height: '36px', background: 'rgba(255,255,255,0.1)' }} />
+        <div className="hud-divider" style={{ width: '1px', height: '36px', background: 'rgba(255,255,255,0.1)' }} />
 
         {/* Claude's Mood */}
-        <div style={{ textAlign: 'center' }}>
-          <div style={{ fontSize: '10px', color: 'rgba(255,255,255,0.4)', letterSpacing: '1px', marginBottom: '2px' }}>CLAUDE</div>
-          <div style={{ fontSize: '18px', fontFamily: 'monospace', color: moodInfo.color }}>
+        <div className="hud-stat" style={{ textAlign: 'center' }}>
+          <div className="hud-stat-label" style={{ fontSize: '10px', color: 'rgba(255,255,255,0.4)', letterSpacing: '1px', marginBottom: '2px' }}>CLAUDE</div>
+          <div className="hud-stat-value" style={{ fontSize: '18px', fontFamily: 'monospace', color: moodInfo.color }}>
             {moodInfo.emoji}
           </div>
         </div>
       </div>
 
       {/* Bottom Left - Speed Control */}
-      <div style={{
+      <div className="hud-speed-control" style={{
         position: 'fixed',
         bottom: '16px',
         left: '16px',
@@ -268,7 +258,7 @@ function HUD({ onHome }) {
       </div>
 
       {/* Bottom Center - Controls Hint */}
-      <div style={{
+      <div className="hud-controls-hint" style={{
         position: 'fixed',
         bottom: '16px',
         left: '50%',
@@ -284,7 +274,7 @@ function HUD({ onHome }) {
       </div>
 
       {/* Right Side - Claude's Logbook */}
-      <div style={{
+      <div className="hud-logbook" style={{
         position: 'fixed',
         top: '16px',
         right: '16px',
@@ -455,6 +445,65 @@ function HUD({ onHome }) {
 
         ::-webkit-scrollbar-thumb:hover {
           background: rgba(255,255,255,0.2);
+        }
+
+        /* Mobile Responsive Styles */
+        @media (max-width: 768px) {
+          .hud-top-bar {
+            left: 16px !important;
+            right: 16px !important;
+            transform: none !important;
+            padding: 10px 12px !important;
+            gap: 12px !important;
+            overflow-x: auto !important;
+            justify-content: flex-start !important;
+          }
+          .hud-top-bar .hud-divider {
+            display: none !important;
+          }
+          .hud-top-bar .hud-stat {
+            min-width: auto !important;
+          }
+          .hud-top-bar .hud-stat-label {
+            font-size: 8px !important;
+          }
+          .hud-top-bar .hud-stat-value {
+            font-size: 14px !important;
+          }
+          .hud-home-btn {
+            padding: 8px !important;
+          }
+          .hud-home-btn span {
+            display: none !important;
+          }
+          .hud-logbook {
+            width: calc(100vw - 32px) !important;
+            max-width: 320px !important;
+            right: 16px !important;
+            top: auto !important;
+            bottom: 70px !important;
+            max-height: 50vh !important;
+          }
+          .hud-speed-control {
+            bottom: 10px !important;
+            left: 10px !important;
+            padding: 8px 12px !important;
+          }
+          .hud-controls-hint {
+            display: none !important;
+          }
+        }
+
+        @media (max-width: 480px) {
+          .hud-top-bar {
+            top: 10px !important;
+            gap: 8px !important;
+            padding: 8px 10px !important;
+          }
+          .hud-logbook {
+            bottom: 60px !important;
+            max-height: 40vh !important;
+          }
         }
       `}</style>
     </>
