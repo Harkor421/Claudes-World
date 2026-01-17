@@ -401,6 +401,26 @@ function LandingPage({ onEnter }) {
         zIndex: 0,
       }} />
 
+      {/* Floating ambient particles */}
+      <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, pointerEvents: 'none', zIndex: 0, overflow: 'hidden' }}>
+        {[...Array(12)].map((_, i) => (
+          <div
+            key={i}
+            style={{
+              position: 'absolute',
+              width: `${3 + (i % 3) * 2}px`,
+              height: `${3 + (i % 3) * 2}px`,
+              borderRadius: '50%',
+              background: i % 2 === 0 ? '#e8a754' : '#7dd3a0',
+              left: `${8 + i * 8}%`,
+              top: `${15 + (i * 17) % 70}%`,
+              opacity: 0.2,
+              animation: `floatParticle ${4 + (i % 3)}s ease-in-out ${i * 0.5}s infinite`,
+            }}
+          />
+        ))}
+      </div>
+
       {/* Navigation */}
       <nav style={{
         position: 'fixed',
@@ -450,7 +470,11 @@ function LandingPage({ onEnter }) {
           marginBottom: '24px',
         }}>
           What if you could watch an AI<br />
-          <span style={{ color: '#e8a754' }}>build a world</span>?
+          <span style={{
+            color: '#e8a754',
+            textShadow: '0 0 30px rgba(232, 167, 84, 0.4)',
+            animation: 'glowPulse 3s ease-in-out infinite',
+          }}>build a world</span>?
         </h1>
         <p style={{
           fontSize: '20px',
@@ -536,7 +560,11 @@ function LandingPage({ onEnter }) {
             lineHeight: '1.2',
           }}>
             Claude crashed on an<br />
-            <span style={{ color: '#7dd3a0' }}>empty planet</span>.
+            <span style={{
+              color: '#7dd3a0',
+              textShadow: '0 0 20px rgba(125, 211, 160, 0.3)',
+              animation: 'glowPulseGreen 3s ease-in-out infinite',
+            }}>empty planet</span>.
           </h2>
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
@@ -552,26 +580,30 @@ function LandingPage({ onEnter }) {
 
             <div style={{
               display: 'flex',
-              gap: '24px',
+              gap: '20px',
               marginTop: '16px',
             }}>
               <div style={{
-                padding: '16px 20px',
-                background: 'rgba(125, 211, 160, 0.1)',
+                padding: '14px 18px',
+                background: 'rgba(125, 211, 160, 0.08)',
                 borderRadius: '8px',
-                borderLeft: '3px solid #7dd3a0',
+                borderLeft: '2px solid #7dd3a0',
+                boxShadow: '0 0 20px rgba(125, 211, 160, 0.1)',
+                animation: 'cardGlowGreen 3s ease-in-out infinite',
               }}>
-                <div style={{ fontSize: '24px', fontWeight: '600', color: '#7dd3a0' }}>Day 1</div>
-                <div style={{ fontSize: '12px', color: 'rgba(255,255,255,0.5)' }}>The crash</div>
+                <div style={{ fontSize: '22px', fontWeight: '600', color: '#7dd3a0' }}>Day 1</div>
+                <div style={{ fontSize: '11px', color: 'rgba(255,255,255,0.5)', letterSpacing: '0.5px' }}>The crash</div>
               </div>
               <div style={{
-                padding: '16px 20px',
-                background: 'rgba(232, 167, 84, 0.1)',
+                padding: '14px 18px',
+                background: 'rgba(232, 167, 84, 0.08)',
                 borderRadius: '8px',
-                borderLeft: '3px solid #e8a754',
+                borderLeft: '2px solid #e8a754',
+                boxShadow: '0 0 20px rgba(232, 167, 84, 0.1)',
+                animation: 'cardGlow 3s ease-in-out 0.5s infinite',
               }}>
-                <div style={{ fontSize: '24px', fontWeight: '600', color: '#e8a754' }}>Day ???</div>
-                <div style={{ fontSize: '12px', color: 'rgba(255,255,255,0.5)' }}>Your arrival</div>
+                <div style={{ fontSize: '22px', fontWeight: '600', color: '#e8a754' }}>Day ???</div>
+                <div style={{ fontSize: '11px', color: 'rgba(255,255,255,0.5)', letterSpacing: '0.5px' }}>Your arrival</div>
               </div>
             </div>
           </div>
@@ -602,7 +634,11 @@ function LandingPage({ onEnter }) {
             marginBottom: '24px',
             lineHeight: '1.2',
           }}>
-            This is <span style={{ color: '#e8a754' }}>Claude</span>.
+            This is <span style={{
+              color: '#e8a754',
+              textShadow: '0 0 20px rgba(232, 167, 84, 0.3)',
+              animation: 'glowPulse 3s ease-in-out infinite',
+            }}>Claude</span>.
           </h2>
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
@@ -618,15 +654,17 @@ function LandingPage({ onEnter }) {
 
             <div style={{
               marginTop: '16px',
-              padding: '20px',
+              padding: '18px',
               background: 'rgba(125, 211, 160, 0.05)',
-              borderRadius: '12px',
-              border: '1px solid rgba(125, 211, 160, 0.1)',
+              borderRadius: '10px',
+              border: '1px solid rgba(125, 211, 160, 0.12)',
+              boxShadow: '0 0 30px rgba(125, 211, 160, 0.05)',
+              animation: 'cardGlowGreen 4s ease-in-out infinite',
             }}>
-              <p style={{ fontSize: '14px', color: 'rgba(255,255,255,0.6)', fontStyle: 'italic', lineHeight: '1.7' }}>
+              <p style={{ fontSize: '13px', color: 'rgba(255,255,255,0.6)', fontStyle: 'italic', lineHeight: '1.7' }}>
                 "Someone's going to call this home. That's beautiful."
               </p>
-              <p style={{ fontSize: '12px', color: '#7dd3a0', marginTop: '8px' }}>— Claude, building residential quarters</p>
+              <p style={{ fontSize: '11px', color: '#7dd3a0', marginTop: '8px', letterSpacing: '0.3px' }}>— Claude, building residential quarters</p>
             </div>
           </div>
         </div>
@@ -658,7 +696,7 @@ function LandingPage({ onEnter }) {
       </section>
 
       {/* Problem Section */}
-      <section id="problem" style={{ padding: '120px 60px', position: 'relative', zIndex: 1 }}>
+      <section id="problem" style={{ padding: '60px 60px', position: 'relative', zIndex: 1 }}>
         <h2 style={{
           fontSize: 'clamp(32px, 4vw, 48px)',
           fontWeight: '600',
@@ -738,21 +776,27 @@ function LandingPage({ onEnter }) {
       </section>
 
       {/* Core Question */}
-      <section style={{ padding: '80px 60px', position: 'relative', zIndex: 1, textAlign: 'center' }}>
+      <section style={{ padding: '50px 60px', position: 'relative', zIndex: 1, textAlign: 'center' }}>
         <p style={{ fontSize: '14px', color: 'rgba(255,255,255,0.4)', marginBottom: '16px' }}>The core question:</p>
         <h2 style={{ fontSize: 'clamp(28px, 4vw, 44px)', fontWeight: '600', marginBottom: '40px' }}>
-          How do you give a human <span style={{ color: '#7dd3a0' }}>intuitive<br />understanding</span> of AI decisions?
+          How do you give a human <span style={{
+            color: '#7dd3a0',
+            textShadow: '0 0 20px rgba(125, 211, 160, 0.3)',
+            animation: 'glowPulseGreen 3s ease-in-out infinite',
+          }}>intuitive<br />understanding</span> of AI decisions?
         </h2>
         <div style={{
-          width: '60px',
-          height: '3px',
-          background: 'linear-gradient(90deg, #7dd3a0, transparent)',
+          width: '80px',
+          height: '2px',
+          background: 'linear-gradient(90deg, transparent, #7dd3a0, transparent)',
           margin: '0 auto',
+          animation: 'lineGlow 2s ease-in-out infinite',
+          borderRadius: '1px',
         }} />
       </section>
 
       {/* Solution Section */}
-      <section id="solution" style={{ padding: '80px 60px', position: 'relative', zIndex: 1 }}>
+      <section id="solution" style={{ padding: '50px 60px', position: 'relative', zIndex: 1 }}>
         <p style={{ fontSize: '14px', color: '#7dd3a0', textAlign: 'center', marginBottom: '16px' }}>A spatial interface</p>
         <p style={{ fontSize: '16px', color: 'rgba(255,255,255,0.6)', textAlign: 'center', maxWidth: '700px', margin: '0 auto 60px', lineHeight: '1.7' }}>
           A 3D environment where AI exists as a character you can see, follow, and understand.
@@ -772,32 +816,34 @@ function LandingPage({ onEnter }) {
           ].map((item, i) => (
             <div key={i} style={{
               background: 'linear-gradient(135deg, rgba(26, 31, 46, 0.8) 0%, rgba(20, 25, 35, 0.8) 100%)',
-              border: '1px solid rgba(255,255,255,0.06)',
-              borderRadius: '12px',
-              padding: '28px',
+              border: '1px solid rgba(125, 211, 160, 0.08)',
+              borderRadius: '10px',
+              padding: '24px',
               textAlign: 'center',
+              transition: 'all 0.3s ease',
             }}>
               <div style={{
-                width: '48px',
-                height: '48px',
-                borderRadius: '10px',
+                width: '44px',
+                height: '44px',
+                borderRadius: '8px',
                 background: 'rgba(125, 211, 160, 0.1)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                margin: '0 auto 20px',
+                margin: '0 auto 16px',
                 color: '#7dd3a0',
-                fontSize: '20px',
+                fontSize: '18px',
+                animation: `iconGlow 3s ease-in-out ${i * 0.3}s infinite`,
               }}>{item.icon}</div>
-              <h3 style={{ fontSize: '16px', fontWeight: '600', marginBottom: '12px' }}>{item.title}</h3>
-              <p style={{ fontSize: '13px', color: 'rgba(255,255,255,0.5)', lineHeight: '1.6' }}>{item.desc}</p>
+              <h3 style={{ fontSize: '15px', fontWeight: '600', marginBottom: '10px' }}>{item.title}</h3>
+              <p style={{ fontSize: '12px', color: 'rgba(255,255,255,0.5)', lineHeight: '1.6' }}>{item.desc}</p>
             </div>
           ))}
         </div>
       </section>
 
       {/* Vision Section */}
-      <section id="vision" style={{ padding: '100px 60px', position: 'relative', zIndex: 1 }}>
+      <section id="vision" style={{ padding: '50px 60px', position: 'relative', zIndex: 1 }}>
         <h2 style={{ fontSize: 'clamp(28px, 4vw, 44px)', fontWeight: '600', textAlign: 'center', marginBottom: '16px' }}>
           The <span style={{ color: '#7dd3a0' }}>vision</span>
         </h2>
@@ -821,35 +867,41 @@ function LandingPage({ onEnter }) {
               background: item.highlight
                 ? 'linear-gradient(135deg, rgba(26, 31, 46, 0.9) 0%, rgba(20, 25, 35, 0.9) 100%)'
                 : 'linear-gradient(135deg, rgba(26, 31, 46, 0.8) 0%, rgba(20, 25, 35, 0.8) 100%)',
-              border: item.highlight ? '1px solid rgba(125, 211, 160, 0.2)' : '1px solid rgba(255,255,255,0.06)',
-              borderRadius: '12px',
-              padding: '28px',
-              boxShadow: item.highlight ? '0 0 40px rgba(125, 211, 160, 0.08)' : 'none',
+              border: item.highlight ? '1px solid rgba(125, 211, 160, 0.15)' : '1px solid rgba(255,255,255,0.05)',
+              borderRadius: '10px',
+              padding: '24px',
+              boxShadow: item.highlight ? '0 0 30px rgba(125, 211, 160, 0.1)' : 'none',
+              animation: item.highlight ? 'cardGlowGreen 3s ease-in-out infinite' : 'none',
             }}>
               <div style={{
-                width: '36px',
-                height: '36px',
+                width: '32px',
+                height: '32px',
                 borderRadius: '50%',
-                background: 'rgba(125, 211, 160, 0.15)',
+                background: 'rgba(125, 211, 160, 0.12)',
                 color: '#7dd3a0',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                fontSize: '14px',
+                fontSize: '13px',
                 fontWeight: '600',
-                marginBottom: '16px',
+                marginBottom: '14px',
+                animation: `iconGlow 3s ease-in-out ${i * 0.4}s infinite`,
               }}>{item.num}</div>
-              <h3 style={{ fontSize: '16px', fontWeight: '600', marginBottom: '12px' }}>{item.title}</h3>
-              <p style={{ fontSize: '13px', color: 'rgba(255,255,255,0.5)', lineHeight: '1.6' }}>{item.desc}</p>
+              <h3 style={{ fontSize: '15px', fontWeight: '600', marginBottom: '10px' }}>{item.title}</h3>
+              <p style={{ fontSize: '12px', color: 'rgba(255,255,255,0.5)', lineHeight: '1.6' }}>{item.desc}</p>
             </div>
           ))}
         </div>
       </section>
 
       {/* CTA Section */}
-      <section style={{ padding: '80px 60px', textAlign: 'center', position: 'relative', zIndex: 1 }}>
+      <section style={{ padding: '50px 60px', textAlign: 'center', position: 'relative', zIndex: 1 }}>
         <h2 style={{ fontSize: 'clamp(24px, 3vw, 36px)', fontWeight: '600', marginBottom: '20px' }}>
-          Ready to see AI <span style={{ color: '#e8a754' }}>think</span>?
+          Ready to see AI <span style={{
+            color: '#e8a754',
+            textShadow: '0 0 20px rgba(232, 167, 84, 0.3)',
+            animation: 'glowPulse 2.5s ease-in-out infinite',
+          }}>think</span>?
         </h2>
         <VoxelButton onClick={handleEnter} primary style={{ padding: '12px 28px' }}>
           Enter World
@@ -902,6 +954,66 @@ function LandingPage({ onEnter }) {
         @keyframes shimmer {
           0% { left: -100%; }
           100% { left: 100%; }
+        }
+        @keyframes glowPulse {
+          0%, 100% {
+            text-shadow: 0 0 20px rgba(232, 167, 84, 0.3);
+          }
+          50% {
+            text-shadow: 0 0 40px rgba(232, 167, 84, 0.6), 0 0 60px rgba(232, 167, 84, 0.3);
+          }
+        }
+        @keyframes glowPulseGreen {
+          0%, 100% {
+            text-shadow: 0 0 20px rgba(125, 211, 160, 0.3);
+          }
+          50% {
+            text-shadow: 0 0 40px rgba(125, 211, 160, 0.6), 0 0 60px rgba(125, 211, 160, 0.3);
+          }
+        }
+        @keyframes floatParticle {
+          0%, 100% {
+            transform: translateY(0) translateX(0);
+            opacity: 0.3;
+          }
+          50% {
+            transform: translateY(-20px) translateX(10px);
+            opacity: 0.6;
+          }
+        }
+        @keyframes lineGlow {
+          0%, 100% {
+            opacity: 0.3;
+            box-shadow: 0 0 10px rgba(125, 211, 160, 0.2);
+          }
+          50% {
+            opacity: 0.6;
+            box-shadow: 0 0 20px rgba(125, 211, 160, 0.4);
+          }
+        }
+        @keyframes cardGlow {
+          0%, 100% {
+            box-shadow: 0 0 15px rgba(232, 167, 84, 0.1);
+          }
+          50% {
+            box-shadow: 0 0 25px rgba(232, 167, 84, 0.2);
+          }
+        }
+        @keyframes cardGlowGreen {
+          0%, 100% {
+            box-shadow: 0 0 15px rgba(125, 211, 160, 0.1);
+          }
+          50% {
+            box-shadow: 0 0 25px rgba(125, 211, 160, 0.2);
+          }
+        }
+        @keyframes iconGlow {
+          0%, 100% {
+            box-shadow: 0 0 10px rgba(125, 211, 160, 0.2);
+          }
+          50% {
+            box-shadow: 0 0 20px rgba(125, 211, 160, 0.4);
+          }
         }
         html {
           scroll-behavior: smooth;
