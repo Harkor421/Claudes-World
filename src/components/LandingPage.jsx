@@ -488,8 +488,8 @@ function LandingPage({ onEnter }) {
 
       {/* Origin Story Section with floating 3D Ship */}
       <section id="origin" style={{
-        minHeight: '100vh',
-        padding: '100px 60px',
+        minHeight: '90vh',
+        padding: '60px 60px',
         position: 'relative',
         zIndex: 1,
         display: 'flex',
@@ -580,7 +580,7 @@ function LandingPage({ onEnter }) {
 
       {/* Meet Claude Section with Character */}
       <section style={{
-        padding: '100px 60px',
+        padding: '40px 60px',
         position: 'relative',
         zIndex: 1,
         display: 'flex',
