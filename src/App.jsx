@@ -36,7 +36,7 @@ function App() {
       >
         <Game />
       </Canvas>
-      <HUD />
+      <HUD onHome={() => setShowLanding(true)} />
       <AIController />
     </>
   )

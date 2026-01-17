@@ -349,6 +349,121 @@ function NavButton({ onClick, children }) {
   )
 }
 
+// Token CA Section with copy functionality
+function TokenSection() {
+  const [copied, setCopied] = useState(false)
+  const [isHovered, setIsHovered] = useState(false)
+
+  // Placeholder CA - replace with actual contract address
+  const contractAddress = "YOUR_CONTRACT_ADDRESS_HERE"
+
+  const handleCopy = async () => {
+    try {
+      await navigator.clipboard.writeText(contractAddress)
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+    } catch (err) {
+      console.error('Failed to copy:', err)
+    }
+  }
+
+  // Truncate address for display
+  const displayAddress = contractAddress.length > 20
+    ? `${contractAddress.slice(0, 8)}...${contractAddress.slice(-8)}`
+    : contractAddress
+
+  return (
+    <section style={{
+      padding: '40px 60px',
+      position: 'relative',
+      zIndex: 1,
+      display: 'flex',
+      justifyContent: 'center',
+    }}>
+      <div style={{
+        display: 'flex',
+        alignItems: 'center',
+        gap: '16px',
+        padding: '16px 24px',
+        background: 'rgba(232, 167, 84, 0.03)',
+        border: '1px solid rgba(232, 167, 84, 0.1)',
+        borderRadius: '12px',
+        maxWidth: '500px',
+      }}>
+        {/* CA Label */}
+        <div style={{
+          fontSize: '11px',
+          fontWeight: '600',
+          color: '#e8a754',
+          letterSpacing: '1.5px',
+          textTransform: 'uppercase',
+        }}>
+          CA
+        </div>
+
+        {/* Divider */}
+        <div style={{
+          width: '1px',
+          height: '20px',
+          background: 'rgba(232, 167, 84, 0.2)',
+        }} />
+
+        {/* Address */}
+        <div style={{
+          fontFamily: "'SF Mono', 'Fira Code', 'Monaco', monospace",
+          fontSize: '13px',
+          color: 'rgba(255, 255, 255, 0.7)',
+          letterSpacing: '0.5px',
+          flex: 1,
+        }}>
+          {displayAddress}
+        </div>
+
+        {/* Copy Button */}
+        <button
+          onClick={handleCopy}
+          onMouseEnter={() => setIsHovered(true)}
+          onMouseLeave={() => setIsHovered(false)}
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '6px',
+            padding: '8px 14px',
+            background: copied
+              ? 'rgba(125, 211, 160, 0.15)'
+              : isHovered
+                ? 'rgba(232, 167, 84, 0.15)'
+                : 'rgba(232, 167, 84, 0.08)',
+            border: `1px solid ${copied ? 'rgba(125, 211, 160, 0.3)' : 'rgba(232, 167, 84, 0.2)'}`,
+            borderRadius: '6px',
+            color: copied ? '#7dd3a0' : '#e8a754',
+            fontSize: '12px',
+            fontWeight: '500',
+            cursor: 'pointer',
+            transition: 'all 0.2s ease',
+            transform: isHovered && !copied ? 'scale(1.02)' : 'scale(1)',
+          }}
+        >
+          {copied ? (
+            <>
+              <span style={{ fontSize: '14px' }}>&#10003;</span>
+              Copied
+            </>
+          ) : (
+            <>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+              </svg>
+              Copy
+            </>
+          )}
+        </button>
+      </div>
+    </section>
+  )
+}
+
 function LandingPage({ onEnter }) {
   const [isTransitioning, setIsTransitioning] = useState(false)
 
@@ -907,6 +1022,9 @@ function LandingPage({ onEnter }) {
           Enter World
         </VoxelButton>
       </section>
+
+      {/* Token CA Section */}
+      <TokenSection />
 
       {/* Footer */}
       <footer style={{

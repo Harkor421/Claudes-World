@@ -34,8 +34,9 @@ const getCitySizeLabel = (size) => {
   return labels[size] || 'Colony'
 }
 
-function HUD() {
+function HUD({ onHome }) {
   const [logbookOpen, setLogbookOpen] = useState(true)
+  const [homeHovered, setHomeHovered] = useState(false)
 
   const timeOfDay = useGameStore((state) => state.timeOfDay)
   const day = useGameStore((state) => state.day)
@@ -87,6 +88,52 @@ function HUD() {
 
   return (
     <>
+      {/* Home Button - Top Left */}
+      <button
+        onClick={onHome}
+        onMouseEnter={() => setHomeHovered(true)}
+        onMouseLeave={() => setHomeHovered(false)}
+        style={{
+          position: 'fixed',
+          top: '16px',
+          left: '16px',
+          zIndex: 100,
+          ...panelStyle,
+          padding: '10px 14px',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '8px',
+          cursor: 'pointer',
+          border: homeHovered ? '1px solid rgba(232, 167, 84, 0.3)' : '1px solid rgba(255, 255, 255, 0.08)',
+          transition: 'all 0.2s ease',
+          transform: homeHovered ? 'scale(1.02)' : 'scale(1)',
+        }}
+      >
+        <svg
+          width="14"
+          height="14"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke={homeHovered ? '#e8a754' : 'rgba(255,255,255,0.6)'}
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          style={{ transition: 'stroke 0.2s ease' }}
+        >
+          <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+          <polyline points="9 22 9 12 15 12 15 22"></polyline>
+        </svg>
+        <span style={{
+          fontSize: '12px',
+          fontWeight: '500',
+          color: homeHovered ? '#e8a754' : 'rgba(255,255,255,0.6)',
+          letterSpacing: '0.5px',
+          transition: 'color 0.2s ease',
+        }}>
+          Home
+        </span>
+      </button>
+
       {/* Top Bar - Time & Stats */}
       <div style={{
         position: 'fixed',
