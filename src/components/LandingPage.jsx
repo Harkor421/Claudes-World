@@ -212,6 +212,143 @@ useGLTF.preload('/models/character.glb')
 useGLTF.preload('/models/Rig_Medium_MovementBasic.glb')
 useGLTF.preload('/models/Rig_Medium_General.glb')
 
+// Animated button with voxel particle effects
+function VoxelButton({ onClick, children, primary = false, style = {} }) {
+  const [isHovered, setIsHovered] = useState(false)
+  const [particles, setParticles] = useState([])
+  const particleIdRef = useRef(0)
+
+  // Spawn particles on hover
+  useEffect(() => {
+    if (!isHovered) {
+      setParticles([])
+      return
+    }
+
+    const interval = setInterval(() => {
+      particleIdRef.current++
+      const newParticle = {
+        id: particleIdRef.current,
+        x: Math.random() * 100,
+        delay: Math.random() * 0.3,
+      }
+      setParticles(prev => [...prev.slice(-8), newParticle])
+    }, 150)
+
+    return () => clearInterval(interval)
+  }, [isHovered])
+
+  const baseStyle = primary ? {
+    background: '#e8a754',
+    border: 'none',
+    color: '#0d1117',
+  } : {
+    background: 'transparent',
+    border: '1px solid rgba(255,255,255,0.15)',
+    color: 'rgba(255,255,255,0.7)',
+  }
+
+  return (
+    <button
+      onClick={onClick}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+      style={{
+        ...baseStyle,
+        padding: '12px 24px',
+        borderRadius: '6px',
+        fontSize: '14px',
+        fontWeight: primary ? '600' : '500',
+        cursor: 'pointer',
+        transition: 'all 0.2s ease',
+        position: 'relative',
+        overflow: 'hidden',
+        transform: isHovered ? 'translateY(-2px)' : 'translateY(0)',
+        boxShadow: isHovered
+          ? (primary ? '0 8px 20px rgba(232, 167, 84, 0.3)' : '0 8px 20px rgba(255,255,255,0.1)')
+          : 'none',
+        ...style,
+      }}
+    >
+      {/* Voxel particles */}
+      {particles.map(particle => (
+        <span
+          key={particle.id}
+          style={{
+            position: 'absolute',
+            left: `${particle.x}%`,
+            bottom: '0',
+            width: '4px',
+            height: '4px',
+            background: primary ? '#0d1117' : '#e8a754',
+            opacity: 0,
+            animation: `voxelFloat 0.8s ease-out ${particle.delay}s forwards`,
+            pointerEvents: 'none',
+          }}
+        />
+      ))}
+      {/* Shimmer effect on hover */}
+      {isHovered && (
+        <span
+          style={{
+            position: 'absolute',
+            top: 0,
+            left: '-100%',
+            width: '100%',
+            height: '100%',
+            background: primary
+              ? 'linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent)'
+              : 'linear-gradient(90deg, transparent, rgba(232, 167, 84, 0.1), transparent)',
+            animation: 'shimmer 0.6s ease-out forwards',
+            pointerEvents: 'none',
+          }}
+        />
+      )}
+      <span style={{ position: 'relative', zIndex: 1 }}>{children}</span>
+    </button>
+  )
+}
+
+// Small nav button variant
+function NavButton({ onClick, children }) {
+  const [isHovered, setIsHovered] = useState(false)
+
+  return (
+    <button
+      onClick={onClick}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+      style={{
+        background: 'transparent',
+        border: '1px solid rgba(232, 167, 84, 0.3)',
+        color: '#e8a754',
+        padding: '8px 16px',
+        borderRadius: '6px',
+        fontSize: '13px',
+        fontWeight: '500',
+        cursor: 'pointer',
+        transition: 'all 0.2s ease',
+        position: 'relative',
+        overflow: 'hidden',
+        transform: isHovered ? 'scale(1.05)' : 'scale(1)',
+        borderColor: isHovered ? 'rgba(232, 167, 84, 0.6)' : 'rgba(232, 167, 84, 0.3)',
+        boxShadow: isHovered ? '0 0 15px rgba(232, 167, 84, 0.2)' : 'none',
+      }}
+    >
+      {/* Corner voxels on hover */}
+      {isHovered && (
+        <>
+          <span style={{ position: 'absolute', top: '2px', left: '2px', width: '3px', height: '3px', background: '#e8a754', animation: 'voxelPulse 0.4s ease-in-out infinite' }} />
+          <span style={{ position: 'absolute', top: '2px', right: '2px', width: '3px', height: '3px', background: '#e8a754', animation: 'voxelPulse 0.4s ease-in-out 0.1s infinite' }} />
+          <span style={{ position: 'absolute', bottom: '2px', left: '2px', width: '3px', height: '3px', background: '#e8a754', animation: 'voxelPulse 0.4s ease-in-out 0.2s infinite' }} />
+          <span style={{ position: 'absolute', bottom: '2px', right: '2px', width: '3px', height: '3px', background: '#e8a754', animation: 'voxelPulse 0.4s ease-in-out 0.3s infinite' }} />
+        </>
+      )}
+      <span style={{ position: 'relative', zIndex: 1 }}>{children}</span>
+    </button>
+  )
+}
+
 function LandingPage({ onEnter }) {
   const [isTransitioning, setIsTransitioning] = useState(false)
 
@@ -289,20 +426,9 @@ function LandingPage({ onEnter }) {
           <a href="#solution" style={{ color: 'rgba(255,255,255,0.6)', textDecoration: 'none', fontSize: '14px' }}>Solution</a>
           <a href="#vision" style={{ color: 'rgba(255,255,255,0.6)', textDecoration: 'none', fontSize: '14px' }}>Vision</a>
         </div>
-        <button
-          onClick={handleEnter}
-          style={{
-            background: 'transparent',
-            border: '1px solid rgba(232, 167, 84, 0.5)',
-            color: '#e8a754',
-            padding: '10px 20px',
-            borderRadius: '8px',
-            fontSize: '14px',
-            cursor: 'pointer',
-          }}
-        >
-          Enter World
-        </button>
+        <NavButton onClick={handleEnter}>
+          Enter
+        </NavButton>
       </nav>
 
       {/* Hero Section */}
@@ -333,38 +459,13 @@ function LandingPage({ onEnter }) {
         }}>
           One city. One mind. Every decision visible.
         </p>
-        <div style={{ display: 'flex', gap: '16px', marginBottom: '80px' }}>
-          <button
-            onClick={handleEnter}
-            style={{
-              background: 'linear-gradient(135deg, #e8a754 0%, #d4943f 100%)',
-              border: 'none',
-              color: '#0d1117',
-              padding: '16px 32px',
-              borderRadius: '8px',
-              fontSize: '16px',
-              fontWeight: '600',
-              cursor: 'pointer',
-              boxShadow: '0 4px 20px rgba(232, 167, 84, 0.3)',
-            }}
-          >
+        <div style={{ display: 'flex', gap: '12px', marginBottom: '80px' }}>
+          <VoxelButton onClick={handleEnter} primary>
             Enter Simulation
-          </button>
-          <button
-            onClick={() => document.getElementById('origin').scrollIntoView({ behavior: 'smooth' })}
-            style={{
-              background: 'rgba(255,255,255,0.05)',
-              border: '1px solid rgba(255,255,255,0.1)',
-              color: '#fff',
-              padding: '16px 32px',
-              borderRadius: '8px',
-              fontSize: '16px',
-              fontWeight: '500',
-              cursor: 'pointer',
-            }}
-          >
+          </VoxelButton>
+          <VoxelButton onClick={() => document.getElementById('origin').scrollIntoView({ behavior: 'smooth' })}>
             Learn More
-          </button>
+          </VoxelButton>
         </div>
 
         <div style={{
@@ -746,26 +847,13 @@ function LandingPage({ onEnter }) {
       </section>
 
       {/* CTA Section */}
-      <section style={{ padding: '100px 60px', textAlign: 'center', position: 'relative', zIndex: 1 }}>
-        <h2 style={{ fontSize: 'clamp(28px, 4vw, 44px)', fontWeight: '600', marginBottom: '24px' }}>
+      <section style={{ padding: '80px 60px', textAlign: 'center', position: 'relative', zIndex: 1 }}>
+        <h2 style={{ fontSize: 'clamp(24px, 3vw, 36px)', fontWeight: '600', marginBottom: '20px' }}>
           Ready to see AI <span style={{ color: '#e8a754' }}>think</span>?
         </h2>
-        <button
-          onClick={handleEnter}
-          style={{
-            background: 'linear-gradient(135deg, #e8a754 0%, #d4943f 100%)',
-            border: 'none',
-            color: '#0d1117',
-            padding: '18px 48px',
-            borderRadius: '8px',
-            fontSize: '18px',
-            fontWeight: '600',
-            cursor: 'pointer',
-            boxShadow: '0 4px 30px rgba(232, 167, 84, 0.3)',
-          }}
-        >
-          Enter Claude's World
-        </button>
+        <VoxelButton onClick={handleEnter} primary style={{ padding: '12px 28px' }}>
+          Enter World
+        </VoxelButton>
       </section>
 
       {/* Footer */}
@@ -784,12 +872,36 @@ function LandingPage({ onEnter }) {
         </p>
       </footer>
 
-      {/* CSS Animation */}
+      {/* CSS Animations */}
       <style>{`
         @keyframes bounce {
           0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
           40% { transform: translateY(-10px); }
           60% { transform: translateY(-5px); }
+        }
+        @keyframes voxelFloat {
+          0% {
+            opacity: 0.8;
+            transform: translateY(0) scale(1);
+          }
+          100% {
+            opacity: 0;
+            transform: translateY(-20px) scale(0.5);
+          }
+        }
+        @keyframes voxelPulse {
+          0%, 100% {
+            opacity: 0.5;
+            transform: scale(1);
+          }
+          50% {
+            opacity: 1;
+            transform: scale(1.5);
+          }
+        }
+        @keyframes shimmer {
+          0% { left: -100%; }
+          100% { left: 100%; }
         }
         html {
           scroll-behavior: smooth;
