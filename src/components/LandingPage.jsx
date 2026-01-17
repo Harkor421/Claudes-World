@@ -213,6 +213,16 @@ useGLTF.preload('/models/Rig_Medium_MovementBasic.glb')
 useGLTF.preload('/models/Rig_Medium_General.glb')
 
 function LandingPage({ onEnter }) {
+  const [isTransitioning, setIsTransitioning] = useState(false)
+
+  const handleEnter = () => {
+    setIsTransitioning(true)
+    // Wait for animation to complete before actually entering
+    setTimeout(() => {
+      onEnter()
+    }, 800)
+  }
+
   return (
     <div style={{
       background: '#0d1117',
@@ -220,6 +230,11 @@ function LandingPage({ onEnter }) {
       fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
       overflowX: 'hidden',
       overflowY: 'auto',
+      // Zoom in animation
+      transform: isTransitioning ? 'scale(3)' : 'scale(1)',
+      opacity: isTransitioning ? 0 : 1,
+      transition: 'transform 0.8s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.6s ease-out',
+      transformOrigin: 'center center',
     }}>
       {/* Grid background - fixed */}
       <div style={{
@@ -275,7 +290,7 @@ function LandingPage({ onEnter }) {
           <a href="#vision" style={{ color: 'rgba(255,255,255,0.6)', textDecoration: 'none', fontSize: '14px' }}>Vision</a>
         </div>
         <button
-          onClick={onEnter}
+          onClick={handleEnter}
           style={{
             background: 'transparent',
             border: '1px solid rgba(232, 167, 84, 0.5)',
@@ -320,7 +335,7 @@ function LandingPage({ onEnter }) {
         </p>
         <div style={{ display: 'flex', gap: '16px', marginBottom: '80px' }}>
           <button
-            onClick={onEnter}
+            onClick={handleEnter}
             style={{
               background: 'linear-gradient(135deg, #e8a754 0%, #d4943f 100%)',
               border: 'none',
@@ -736,7 +751,7 @@ function LandingPage({ onEnter }) {
           Ready to see AI <span style={{ color: '#e8a754' }}>think</span>?
         </h2>
         <button
-          onClick={onEnter}
+          onClick={handleEnter}
           style={{
             background: 'linear-gradient(135deg, #e8a754 0%, #d4943f 100%)',
             border: 'none',
