@@ -373,14 +373,14 @@ function TokenSection() {
     : contractAddress
 
   return (
-    <section style={{
+    <section className="landing-section" style={{
       padding: '40px 60px',
       position: 'relative',
       zIndex: 1,
       display: 'flex',
       justifyContent: 'center',
     }}>
-      <div style={{
+      <div className="token-section-card" style={{
         display: 'flex',
         alignItems: 'center',
         gap: '16px',
@@ -389,6 +389,7 @@ function TokenSection() {
         border: '1px solid rgba(232, 167, 84, 0.1)',
         borderRadius: '12px',
         maxWidth: '500px',
+        width: '100%',
       }}>
         {/* CA Label */}
         <div style={{
@@ -402,7 +403,7 @@ function TokenSection() {
         </div>
 
         {/* Divider */}
-        <div style={{
+        <div className="token-divider" style={{
           width: '1px',
           height: '20px',
           background: 'rgba(232, 167, 84, 0.2)',
@@ -537,7 +538,7 @@ function LandingPage({ onEnter }) {
       </div>
 
       {/* Navigation */}
-      <nav style={{
+      <nav className="landing-nav" style={{
         position: 'fixed',
         top: 0,
         left: 0,
@@ -549,13 +550,13 @@ function LandingPage({ onEnter }) {
         zIndex: 100,
         background: 'linear-gradient(180deg, rgba(13,17,23,0.95) 0%, rgba(13,17,23,0) 100%)',
       }}>
-        <div style={{
+        <div className="landing-nav-logo" style={{
           fontSize: '24px',
           fontWeight: '700',
           color: '#e8a754',
           letterSpacing: '-0.5px',
         }}>Claude's World</div>
-        <div style={{ display: 'flex', gap: '40px' }}>
+        <div className="landing-nav-links" style={{ display: 'flex', gap: '40px' }}>
           <a href="#origin" style={{ color: 'rgba(255,255,255,0.6)', textDecoration: 'none', fontSize: '14px' }}>Origin</a>
           <a href="#problem" style={{ color: 'rgba(255,255,255,0.6)', textDecoration: 'none', fontSize: '14px' }}>Problem</a>
           <a href="#solution" style={{ color: 'rgba(255,255,255,0.6)', textDecoration: 'none', fontSize: '14px' }}>Solution</a>
@@ -567,7 +568,7 @@ function LandingPage({ onEnter }) {
       </nav>
 
       {/* Hero Section */}
-      <section style={{
+      <section className="landing-hero" style={{
         minHeight: '100vh',
         display: 'flex',
         flexDirection: 'column',
@@ -579,10 +580,11 @@ function LandingPage({ onEnter }) {
         zIndex: 1,
       }}>
         <h1 style={{
-          fontSize: 'clamp(36px, 5vw, 64px)',
+          fontSize: 'clamp(28px, 5vw, 64px)',
           fontWeight: '600',
           lineHeight: '1.1',
           marginBottom: '24px',
+          padding: '0 10px',
         }}>
           What if you could watch an AI<br />
           <span style={{
@@ -592,13 +594,14 @@ function LandingPage({ onEnter }) {
           }}>build a world</span>?
         </h1>
         <p style={{
-          fontSize: '20px',
+          fontSize: 'clamp(16px, 3vw, 20px)',
           color: 'rgba(255,255,255,0.6)',
           marginBottom: '40px',
+          padding: '0 20px',
         }}>
           One city. One mind. Every decision visible.
         </p>
-        <div style={{ display: 'flex', gap: '12px', marginBottom: '80px' }}>
+        <div className="landing-hero-buttons" style={{ display: 'flex', gap: '12px', marginBottom: '80px' }}>
           <VoxelButton onClick={handleEnter} primary>
             Enter Simulation
           </VoxelButton>
@@ -626,8 +629,8 @@ function LandingPage({ onEnter }) {
       </section>
 
       {/* Origin Story Section with floating 3D Ship */}
-      <section id="origin" style={{
-        minHeight: '90vh',
+      <section id="origin" className="landing-section landing-section-flex" style={{
+        minHeight: 'auto',
         padding: '60px 60px',
         position: 'relative',
         zIndex: 1,
@@ -636,7 +639,7 @@ function LandingPage({ onEnter }) {
         gap: '40px',
       }}>
         {/* 3D Ship - transparent, hovering */}
-        <div style={{
+        <div className="landing-canvas-container" style={{
           flex: 1.2,
           height: '600px',
           position: 'relative',
@@ -693,7 +696,7 @@ function LandingPage({ onEnter }) {
               Every structure has a reason. Every choice reveals how an AI thinks.
             </p>
 
-            <div style={{
+            <div className="landing-stats-row" style={{
               display: 'flex',
               gap: '20px',
               marginTop: '16px',
@@ -705,6 +708,7 @@ function LandingPage({ onEnter }) {
                 borderLeft: '2px solid #7dd3a0',
                 boxShadow: '0 0 20px rgba(125, 211, 160, 0.1)',
                 animation: 'cardGlowGreen 3s ease-in-out infinite',
+                flex: 1,
               }}>
                 <div style={{ fontSize: '22px', fontWeight: '600', color: '#7dd3a0' }}>Day 1</div>
                 <div style={{ fontSize: '11px', color: 'rgba(255,255,255,0.5)', letterSpacing: '0.5px' }}>The crash</div>
@@ -716,6 +720,7 @@ function LandingPage({ onEnter }) {
                 borderLeft: '2px solid #e8a754',
                 boxShadow: '0 0 20px rgba(232, 167, 84, 0.1)',
                 animation: 'cardGlow 3s ease-in-out 0.5s infinite',
+                flex: 1,
               }}>
                 <div style={{ fontSize: '22px', fontWeight: '600', color: '#e8a754' }}>Day ???</div>
                 <div style={{ fontSize: '11px', color: 'rgba(255,255,255,0.5)', letterSpacing: '0.5px' }}>Your arrival</div>
@@ -726,7 +731,7 @@ function LandingPage({ onEnter }) {
       </section>
 
       {/* Meet Claude Section with Character */}
-      <section style={{
+      <section className="landing-section landing-section-flex" style={{
         padding: '40px 60px',
         position: 'relative',
         zIndex: 1,
@@ -785,7 +790,7 @@ function LandingPage({ onEnter }) {
         </div>
 
         {/* 3D Character running on grid */}
-        <div style={{
+        <div className="landing-canvas-container" style={{
           flex: 1,
           height: '500px',
           position: 'relative',
@@ -811,7 +816,7 @@ function LandingPage({ onEnter }) {
       </section>
 
       {/* Problem Section */}
-      <section id="problem" style={{ padding: '60px 60px', position: 'relative', zIndex: 1 }}>
+      <section id="problem" className="landing-section" style={{ padding: '60px 60px', position: 'relative', zIndex: 1 }}>
         <h2 style={{
           fontSize: 'clamp(32px, 4vw, 48px)',
           fontWeight: '600',
@@ -838,7 +843,7 @@ function LandingPage({ onEnter }) {
           Zero intuition.
         </h2>
 
-        <div style={{
+        <div className="landing-problem-flex" style={{
           display: 'flex',
           gap: '40px',
           maxWidth: '900px',
@@ -846,7 +851,7 @@ function LandingPage({ onEnter }) {
           alignItems: 'center',
         }}>
           {/* Terminal mockup */}
-          <div style={{
+          <div className="landing-terminal" style={{
             flex: 1,
             background: 'linear-gradient(135deg, rgba(26, 31, 46, 0.9) 0%, rgba(20, 25, 35, 0.9) 100%)',
             border: '1px solid rgba(255,255,255,0.08)',
@@ -891,7 +896,7 @@ function LandingPage({ onEnter }) {
       </section>
 
       {/* Core Question */}
-      <section style={{ padding: '50px 60px', position: 'relative', zIndex: 1, textAlign: 'center' }}>
+      <section className="landing-section" style={{ padding: '50px 60px', position: 'relative', zIndex: 1, textAlign: 'center' }}>
         <p style={{ fontSize: '14px', color: 'rgba(255,255,255,0.4)', marginBottom: '16px' }}>The core question:</p>
         <h2 style={{ fontSize: 'clamp(28px, 4vw, 44px)', fontWeight: '600', marginBottom: '40px' }}>
           How do you give a human <span style={{
@@ -911,13 +916,13 @@ function LandingPage({ onEnter }) {
       </section>
 
       {/* Solution Section */}
-      <section id="solution" style={{ padding: '50px 60px', position: 'relative', zIndex: 1 }}>
+      <section id="solution" className="landing-section" style={{ padding: '50px 60px', position: 'relative', zIndex: 1 }}>
         <p style={{ fontSize: '14px', color: '#7dd3a0', textAlign: 'center', marginBottom: '16px' }}>A spatial interface</p>
-        <p style={{ fontSize: '16px', color: 'rgba(255,255,255,0.6)', textAlign: 'center', maxWidth: '700px', margin: '0 auto 60px', lineHeight: '1.7' }}>
+        <p style={{ fontSize: 'clamp(14px, 3vw, 16px)', color: 'rgba(255,255,255,0.6)', textAlign: 'center', maxWidth: '700px', margin: '0 auto 40px', lineHeight: '1.7', padding: '0 10px' }}>
           A 3D environment where AI exists as a character you can see, follow, and understand.
         </p>
 
-        <div style={{
+        <div className="landing-grid-3" style={{
           display: 'grid',
           gridTemplateColumns: 'repeat(3, 1fr)',
           gap: '24px',
@@ -958,15 +963,15 @@ function LandingPage({ onEnter }) {
       </section>
 
       {/* Vision Section */}
-      <section id="vision" style={{ padding: '50px 60px', position: 'relative', zIndex: 1 }}>
+      <section id="vision" className="landing-section" style={{ padding: '50px 60px', position: 'relative', zIndex: 1 }}>
         <h2 style={{ fontSize: 'clamp(28px, 4vw, 44px)', fontWeight: '600', textAlign: 'center', marginBottom: '16px' }}>
           The <span style={{ color: '#7dd3a0' }}>vision</span>
         </h2>
-        <p style={{ fontSize: '15px', color: 'rgba(255,255,255,0.5)', textAlign: 'center', maxWidth: '650px', margin: '0 auto 50px' }}>
+        <p style={{ fontSize: 'clamp(13px, 3vw, 15px)', color: 'rgba(255,255,255,0.5)', textAlign: 'center', maxWidth: '650px', margin: '0 auto 50px', padding: '0 10px' }}>
           Imagine watching AI build a civilization. Every decision manifests in the world.
         </p>
 
-        <div style={{
+        <div className="landing-grid-3" style={{
           display: 'grid',
           gridTemplateColumns: 'repeat(3, 1fr)',
           gap: '24px',
@@ -1010,7 +1015,7 @@ function LandingPage({ onEnter }) {
       </section>
 
       {/* CTA Section */}
-      <section style={{ padding: '50px 60px', textAlign: 'center', position: 'relative', zIndex: 1 }}>
+      <section className="landing-section" style={{ padding: '50px 60px', textAlign: 'center', position: 'relative', zIndex: 1 }}>
         <h2 style={{ fontSize: 'clamp(24px, 3vw, 36px)', fontWeight: '600', marginBottom: '20px' }}>
           Ready to see AI <span style={{
             color: '#e8a754',
@@ -1027,7 +1032,7 @@ function LandingPage({ onEnter }) {
       <TokenSection />
 
       {/* Footer */}
-      <footer style={{
+      <footer className="landing-footer" style={{
         padding: '40px 60px',
         borderTop: '1px solid rgba(255,255,255,0.05)',
         textAlign: 'center',
@@ -1135,6 +1140,71 @@ function LandingPage({ onEnter }) {
         }
         html {
           scroll-behavior: smooth;
+        }
+
+        /* Mobile Responsive Styles */
+        @media (max-width: 768px) {
+          .landing-nav {
+            padding: 16px 20px !important;
+          }
+          .landing-nav-links {
+            display: none !important;
+          }
+          .landing-nav-logo {
+            font-size: 18px !important;
+          }
+          .landing-section {
+            padding: 40px 20px !important;
+          }
+          .landing-section-flex {
+            flex-direction: column !important;
+            gap: 24px !important;
+          }
+          .landing-canvas-container {
+            height: 300px !important;
+            width: 100% !important;
+          }
+          .landing-grid-3 {
+            grid-template-columns: 1fr !important;
+            gap: 16px !important;
+          }
+          .landing-stats-row {
+            flex-wrap: wrap !important;
+            gap: 12px !important;
+          }
+          .landing-hero-buttons {
+            flex-direction: column !important;
+            gap: 10px !important;
+          }
+          .landing-terminal {
+            display: none !important;
+          }
+          .landing-problem-flex {
+            flex-direction: column !important;
+          }
+          .token-section-card {
+            flex-direction: column !important;
+            gap: 12px !important;
+            text-align: center !important;
+          }
+          .token-divider {
+            display: none !important;
+          }
+          .landing-footer {
+            padding: 30px 20px !important;
+          }
+        }
+
+        @media (max-width: 480px) {
+          .landing-hero h1 {
+            font-size: 28px !important;
+          }
+          .landing-hero p {
+            font-size: 16px !important;
+          }
+          .landing-section h2 {
+            font-size: 24px !important;
+          }
         }
       `}</style>
     </div>
