@@ -28,7 +28,7 @@ function FloatingShip() {
       {/* Subtle glow underneath */}
       <mesh position={[0, -1.5, 0]} rotation={[-Math.PI / 2, 0, 0]}>
         <circleGeometry args={[3, 32]} />
-        <meshBasicMaterial color="#e8a754" transparent opacity={0.1} />
+        <meshBasicMaterial color="#C15F3C" transparent opacity={0.1} />
       </mesh>
 
       <ambientLight intensity={0.6} color="#ffffff" />
@@ -239,7 +239,7 @@ function VoxelButton({ onClick, children, primary = false, style = {} }) {
   }, [isHovered])
 
   const baseStyle = primary ? {
-    background: '#e8a754',
+    background: '#C15F3C',
     border: 'none',
     color: '#0d1117',
   } : {
@@ -265,7 +265,7 @@ function VoxelButton({ onClick, children, primary = false, style = {} }) {
         overflow: 'hidden',
         transform: isHovered ? 'translateY(-2px)' : 'translateY(0)',
         boxShadow: isHovered
-          ? (primary ? '0 8px 20px rgba(232, 167, 84, 0.3)' : '0 8px 20px rgba(255,255,255,0.1)')
+          ? (primary ? '0 8px 20px rgba(193, 95, 60, 0.3)' : '0 8px 20px rgba(255,255,255,0.1)')
           : 'none',
         ...style,
       }}
@@ -280,7 +280,7 @@ function VoxelButton({ onClick, children, primary = false, style = {} }) {
             bottom: '0',
             width: '4px',
             height: '4px',
-            background: primary ? '#0d1117' : '#e8a754',
+            background: primary ? '#0d1117' : '#C15F3C',
             opacity: 0,
             animation: `voxelFloat 0.8s ease-out ${particle.delay}s forwards`,
             pointerEvents: 'none',
@@ -298,7 +298,7 @@ function VoxelButton({ onClick, children, primary = false, style = {} }) {
             height: '100%',
             background: primary
               ? 'linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent)'
-              : 'linear-gradient(90deg, transparent, rgba(232, 167, 84, 0.1), transparent)',
+              : 'linear-gradient(90deg, transparent, rgba(193, 95, 60, 0.1), transparent)',
             animation: 'shimmer 0.6s ease-out forwards',
             pointerEvents: 'none',
           }}
@@ -320,8 +320,8 @@ function NavButton({ onClick, children }) {
       onMouseLeave={() => setIsHovered(false)}
       style={{
         background: 'transparent',
-        border: '1px solid rgba(232, 167, 84, 0.3)',
-        color: '#e8a754',
+        border: '1px solid rgba(193, 95, 60, 0.3)',
+        color: '#C15F3C',
         padding: '8px 16px',
         borderRadius: '6px',
         fontSize: '13px',
@@ -331,17 +331,17 @@ function NavButton({ onClick, children }) {
         position: 'relative',
         overflow: 'hidden',
         transform: isHovered ? 'scale(1.05)' : 'scale(1)',
-        borderColor: isHovered ? 'rgba(232, 167, 84, 0.6)' : 'rgba(232, 167, 84, 0.3)',
-        boxShadow: isHovered ? '0 0 15px rgba(232, 167, 84, 0.2)' : 'none',
+        borderColor: isHovered ? 'rgba(193, 95, 60, 0.6)' : 'rgba(193, 95, 60, 0.3)',
+        boxShadow: isHovered ? '0 0 15px rgba(193, 95, 60, 0.2)' : 'none',
       }}
     >
       {/* Corner voxels on hover */}
       {isHovered && (
         <>
-          <span style={{ position: 'absolute', top: '2px', left: '2px', width: '3px', height: '3px', background: '#e8a754', animation: 'voxelPulse 0.4s ease-in-out infinite' }} />
-          <span style={{ position: 'absolute', top: '2px', right: '2px', width: '3px', height: '3px', background: '#e8a754', animation: 'voxelPulse 0.4s ease-in-out 0.1s infinite' }} />
-          <span style={{ position: 'absolute', bottom: '2px', left: '2px', width: '3px', height: '3px', background: '#e8a754', animation: 'voxelPulse 0.4s ease-in-out 0.2s infinite' }} />
-          <span style={{ position: 'absolute', bottom: '2px', right: '2px', width: '3px', height: '3px', background: '#e8a754', animation: 'voxelPulse 0.4s ease-in-out 0.3s infinite' }} />
+          <span style={{ position: 'absolute', top: '2px', left: '2px', width: '3px', height: '3px', background: '#C15F3C', animation: 'voxelPulse 0.4s ease-in-out infinite' }} />
+          <span style={{ position: 'absolute', top: '2px', right: '2px', width: '3px', height: '3px', background: '#C15F3C', animation: 'voxelPulse 0.4s ease-in-out 0.1s infinite' }} />
+          <span style={{ position: 'absolute', bottom: '2px', left: '2px', width: '3px', height: '3px', background: '#C15F3C', animation: 'voxelPulse 0.4s ease-in-out 0.2s infinite' }} />
+          <span style={{ position: 'absolute', bottom: '2px', right: '2px', width: '3px', height: '3px', background: '#C15F3C', animation: 'voxelPulse 0.4s ease-in-out 0.3s infinite' }} />
         </>
       )}
       <span style={{ position: 'relative', zIndex: 1 }}>{children}</span>
@@ -355,7 +355,7 @@ function TokenSection() {
   const [isHovered, setIsHovered] = useState(false)
 
   // Placeholder CA - replace with actual contract address
-  const contractAddress = "YOUR_CONTRACT_ADDRESS_HERE"
+  const contractAddress = "TBA"
 
   const handleCopy = async () => {
     try {
@@ -385,8 +385,8 @@ function TokenSection() {
         alignItems: 'center',
         gap: '16px',
         padding: '16px 24px',
-        background: 'rgba(232, 167, 84, 0.03)',
-        border: '1px solid rgba(232, 167, 84, 0.1)',
+        background: 'rgba(193, 95, 60, 0.03)',
+        border: '1px solid rgba(193, 95, 60, 0.1)',
         borderRadius: '12px',
         maxWidth: '500px',
         width: '100%',
@@ -395,7 +395,7 @@ function TokenSection() {
         <div style={{
           fontSize: '11px',
           fontWeight: '600',
-          color: '#e8a754',
+          color: '#C15F3C',
           letterSpacing: '1.5px',
           textTransform: 'uppercase',
         }}>
@@ -406,7 +406,7 @@ function TokenSection() {
         <div className="token-divider" style={{
           width: '1px',
           height: '20px',
-          background: 'rgba(232, 167, 84, 0.2)',
+          background: 'rgba(193, 95, 60, 0.2)',
         }} />
 
         {/* Address */}
@@ -433,11 +433,11 @@ function TokenSection() {
             background: copied
               ? 'rgba(125, 211, 160, 0.15)'
               : isHovered
-                ? 'rgba(232, 167, 84, 0.15)'
-                : 'rgba(232, 167, 84, 0.08)',
-            border: `1px solid ${copied ? 'rgba(125, 211, 160, 0.3)' : 'rgba(232, 167, 84, 0.2)'}`,
+                ? 'rgba(193, 95, 60, 0.15)'
+                : 'rgba(193, 95, 60, 0.08)',
+            border: `1px solid ${copied ? 'rgba(125, 211, 160, 0.3)' : 'rgba(193, 95, 60, 0.2)'}`,
             borderRadius: '6px',
-            color: copied ? '#7dd3a0' : '#e8a754',
+            color: copied ? '#7dd3a0' : '#C15F3C',
             fontSize: '12px',
             fontWeight: '500',
             cursor: 'pointer',
@@ -462,6 +462,85 @@ function TokenSection() {
         </button>
       </div>
     </section>
+  )
+}
+
+// Cleaner inline CA for hero section
+function HeroTokenSection() {
+  const [copied, setCopied] = useState(false)
+
+  const contractAddress = "YOUR_CONTRACT_ADDRESS_HERE"
+
+  const handleCopy = async () => {
+    try {
+      await navigator.clipboard.writeText(contractAddress)
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+    } catch (err) {
+      console.error('Failed to copy:', err)
+    }
+  }
+
+  const displayAddress = contractAddress.length > 20
+    ? `${contractAddress.slice(0, 6)}...${contractAddress.slice(-4)}`
+    : contractAddress
+
+  return (
+    <div className="hero-ca-section" style={{
+      display: 'flex',
+      alignItems: 'center',
+      gap: '12px',
+      marginBottom: '60px',
+      padding: '10px 16px',
+      background: 'rgba(255, 255, 255, 0.03)',
+      border: '1px solid rgba(255, 255, 255, 0.06)',
+      borderRadius: '8px',
+    }}>
+      <span style={{
+        fontSize: '10px',
+        fontWeight: '600',
+        color: 'rgba(255, 255, 255, 0.4)',
+        letterSpacing: '1px',
+      }}>
+        CA
+      </span>
+      <span style={{
+        fontFamily: "'SF Mono', 'Fira Code', monospace",
+        fontSize: '12px',
+        color: 'rgba(255, 255, 255, 0.6)',
+        letterSpacing: '0.3px',
+      }}>
+        {displayAddress}
+      </span>
+      <button
+        onClick={handleCopy}
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '4px',
+          padding: '4px 10px',
+          background: copied ? 'rgba(125, 211, 160, 0.1)' : 'transparent',
+          border: `1px solid ${copied ? 'rgba(125, 211, 160, 0.3)' : 'rgba(255, 255, 255, 0.1)'}`,
+          borderRadius: '4px',
+          color: copied ? '#7dd3a0' : 'rgba(255, 255, 255, 0.5)',
+          fontSize: '11px',
+          cursor: 'pointer',
+          transition: 'all 0.2s ease',
+        }}
+      >
+        {copied ? (
+          <span>Copied</span>
+        ) : (
+          <>
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+              <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+            </svg>
+            <span>Copy</span>
+          </>
+        )}
+      </button>
+    </div>
   )
 }
 
@@ -512,7 +591,7 @@ function LandingPage({ onEnter, onDocs }) {
         left: 0,
         right: 0,
         bottom: 0,
-        background: 'radial-gradient(ellipse at 50% 0%, rgba(232, 167, 84, 0.08) 0%, transparent 50%)',
+        background: 'radial-gradient(ellipse at 50% 0%, rgba(193, 95, 60, 0.08) 0%, transparent 50%)',
         pointerEvents: 'none',
         zIndex: 0,
       }} />
@@ -527,7 +606,7 @@ function LandingPage({ onEnter, onDocs }) {
               width: `${3 + (i % 3) * 2}px`,
               height: `${3 + (i % 3) * 2}px`,
               borderRadius: '50%',
-              background: i % 2 === 0 ? '#e8a754' : '#7dd3a0',
+              background: i % 2 === 0 ? '#C15F3C' : '#7dd3a0',
               left: `${8 + i * 8}%`,
               top: `${15 + (i * 17) % 70}%`,
               opacity: 0.2,
@@ -550,12 +629,15 @@ function LandingPage({ onEnter, onDocs }) {
         zIndex: 100,
         background: 'linear-gradient(180deg, rgba(13,17,23,0.95) 0%, rgba(13,17,23,0) 100%)',
       }}>
-        <div className="landing-nav-logo" style={{
-          fontSize: '24px',
-          fontWeight: '700',
-          color: '#e8a754',
-          letterSpacing: '-0.5px',
-        }}>Claude's World</div>
+        <img
+          src="/logo.png"
+          alt="Claude's World"
+          className="landing-nav-logo"
+          style={{
+            height: '36px',
+            width: 'auto',
+          }}
+        />
         <div className="landing-nav-links" style={{ display: 'flex', gap: '40px' }}>
           <a href="#origin" style={{ color: 'rgba(255,255,255,0.6)', textDecoration: 'none', fontSize: '14px' }}>Origin</a>
           <a href="#problem" style={{ color: 'rgba(255,255,255,0.6)', textDecoration: 'none', fontSize: '14px' }}>Problem</a>
@@ -588,8 +670,8 @@ function LandingPage({ onEnter, onDocs }) {
         }}>
           What if you could watch an AI<br />
           <span style={{
-            color: '#e8a754',
-            textShadow: '0 0 30px rgba(232, 167, 84, 0.4)',
+            color: '#C15F3C',
+            textShadow: '0 0 30px rgba(193, 95, 60, 0.4)',
             animation: 'glowPulse 3s ease-in-out infinite',
           }}>build a world</span>?
         </h1>
@@ -601,7 +683,7 @@ function LandingPage({ onEnter, onDocs }) {
         }}>
           One city. One mind. Every decision visible.
         </p>
-        <div className="landing-hero-buttons" style={{ display: 'flex', gap: '12px', marginBottom: '80px' }}>
+        <div className="landing-hero-buttons" style={{ display: 'flex', gap: '12px', marginBottom: '24px' }}>
           <VoxelButton onClick={handleEnter} primary>
             Enter Simulation
           </VoxelButton>
@@ -617,6 +699,9 @@ function LandingPage({ onEnter, onDocs }) {
             </span>
           </VoxelButton>
         </div>
+
+        {/* Inline CA Section */}
+        <HeroTokenSection />
 
         <div style={{
           position: 'absolute',
@@ -674,7 +759,7 @@ function LandingPage({ onEnter, onDocs }) {
         <div style={{ flex: 1 }}>
           <p style={{
             fontSize: '12px',
-            color: '#e8a754',
+            color: '#C15F3C',
             letterSpacing: '2px',
             marginBottom: '16px',
           }}>THE ORIGIN</p>
@@ -723,14 +808,14 @@ function LandingPage({ onEnter, onDocs }) {
               </div>
               <div style={{
                 padding: '14px 18px',
-                background: 'rgba(232, 167, 84, 0.08)',
+                background: 'rgba(193, 95, 60, 0.08)',
                 borderRadius: '8px',
-                borderLeft: '2px solid #e8a754',
-                boxShadow: '0 0 20px rgba(232, 167, 84, 0.1)',
+                borderLeft: '2px solid #C15F3C',
+                boxShadow: '0 0 20px rgba(193, 95, 60, 0.1)',
                 animation: 'cardGlow 3s ease-in-out 0.5s infinite',
                 flex: 1,
               }}>
-                <div style={{ fontSize: '22px', fontWeight: '600', color: '#e8a754' }}>Day ???</div>
+                <div style={{ fontSize: '22px', fontWeight: '600', color: '#C15F3C' }}>Day ???</div>
                 <div style={{ fontSize: '11px', color: 'rgba(255,255,255,0.5)', letterSpacing: '0.5px' }}>Your arrival</div>
               </div>
             </div>
@@ -763,8 +848,8 @@ function LandingPage({ onEnter, onDocs }) {
             lineHeight: '1.2',
           }}>
             This is <span style={{
-              color: '#e8a754',
-              textShadow: '0 0 20px rgba(232, 167, 84, 0.3)',
+              color: '#C15F3C',
+              textShadow: '0 0 20px rgba(193, 95, 60, 0.3)',
               animation: 'glowPulse 3s ease-in-out infinite',
             }}>Claude</span>.
           </h2>
@@ -831,7 +916,7 @@ function LandingPage({ onEnter, onDocs }) {
           textAlign: 'center',
           marginBottom: '8px',
         }}>
-          AI is <span style={{ color: '#e8a754' }}>invisible</span>.
+          AI is <span style={{ color: '#C15F3C' }}>invisible</span>.
         </h2>
         <h2 style={{
           fontSize: 'clamp(32px, 4vw, 48px)',
@@ -896,7 +981,7 @@ function LandingPage({ onEnter, onDocs }) {
             <p style={{ fontSize: '15px', fontWeight: '600', color: '#fff', lineHeight: '1.8' }}>
               At scale, text interfaces break down.
             </p>
-            <p style={{ marginTop: '20px', color: '#e8a754', fontSize: '14px' }}>
+            <p style={{ marginTop: '20px', color: '#C15F3C', fontSize: '14px' }}>
               There has to be a better way.
             </p>
           </div>
@@ -908,24 +993,24 @@ function LandingPage({ onEnter, onDocs }) {
         <p style={{ fontSize: '14px', color: 'rgba(255,255,255,0.4)', marginBottom: '16px' }}>The core question:</p>
         <h2 style={{ fontSize: 'clamp(28px, 4vw, 44px)', fontWeight: '600', marginBottom: '40px' }}>
           How do you give a human <span style={{
-            color: '#7dd3a0',
-            textShadow: '0 0 20px rgba(125, 211, 160, 0.3)',
-            animation: 'glowPulseGreen 3s ease-in-out infinite',
+            color: '#C15F3C',
+            textShadow: '0 0 20px rgba(193, 95, 60, 0.3)',
+            animation: 'glowPulse 3s ease-in-out infinite',
           }}>intuitive<br />understanding</span> of AI decisions?
         </h2>
         <div style={{
           width: '80px',
           height: '2px',
-          background: 'linear-gradient(90deg, transparent, #7dd3a0, transparent)',
+          background: 'linear-gradient(90deg, transparent, #C15F3C, transparent)',
           margin: '0 auto',
-          animation: 'lineGlow 2s ease-in-out infinite',
+          animation: 'lineGlowOrange 2s ease-in-out infinite',
           borderRadius: '1px',
         }} />
       </section>
 
       {/* Solution Section */}
       <section id="solution" className="landing-section" style={{ padding: '50px 60px', position: 'relative', zIndex: 1 }}>
-        <p style={{ fontSize: '14px', color: '#7dd3a0', textAlign: 'center', marginBottom: '16px' }}>A spatial interface</p>
+        <p style={{ fontSize: '14px', color: '#C15F3C', textAlign: 'center', marginBottom: '16px' }}>A spatial interface</p>
         <p style={{ fontSize: 'clamp(14px, 3vw, 16px)', color: 'rgba(255,255,255,0.6)', textAlign: 'center', maxWidth: '700px', margin: '0 auto 40px', lineHeight: '1.7', padding: '0 10px' }}>
           A 3D environment where AI exists as a character you can see, follow, and understand.
         </p>
@@ -944,7 +1029,7 @@ function LandingPage({ onEnter, onDocs }) {
           ].map((item, i) => (
             <div key={i} style={{
               background: 'linear-gradient(135deg, rgba(26, 31, 46, 0.8) 0%, rgba(20, 25, 35, 0.8) 100%)',
-              border: '1px solid rgba(125, 211, 160, 0.08)',
+              border: '1px solid rgba(193, 95, 60, 0.08)',
               borderRadius: '10px',
               padding: '24px',
               textAlign: 'center',
@@ -954,14 +1039,14 @@ function LandingPage({ onEnter, onDocs }) {
                 width: '44px',
                 height: '44px',
                 borderRadius: '8px',
-                background: 'rgba(125, 211, 160, 0.1)',
+                background: 'rgba(193, 95, 60, 0.1)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
                 margin: '0 auto 16px',
-                color: '#7dd3a0',
+                color: '#C15F3C',
                 fontSize: '18px',
-                animation: `iconGlow 3s ease-in-out ${i * 0.3}s infinite`,
+                animation: `iconGlowOrange 3s ease-in-out ${i * 0.3}s infinite`,
               }}>{item.icon}</div>
               <h3 style={{ fontSize: '15px', fontWeight: '600', marginBottom: '10px' }}>{item.title}</h3>
               <p style={{ fontSize: '12px', color: 'rgba(255,255,255,0.5)', lineHeight: '1.6' }}>{item.desc}</p>
@@ -973,7 +1058,7 @@ function LandingPage({ onEnter, onDocs }) {
       {/* Vision Section */}
       <section id="vision" className="landing-section" style={{ padding: '50px 60px', position: 'relative', zIndex: 1 }}>
         <h2 style={{ fontSize: 'clamp(28px, 4vw, 44px)', fontWeight: '600', textAlign: 'center', marginBottom: '16px' }}>
-          The <span style={{ color: '#7dd3a0' }}>vision</span>
+          The <span style={{ color: '#C15F3C' }}>vision</span>
         </h2>
         <p style={{ fontSize: 'clamp(13px, 3vw, 15px)', color: 'rgba(255,255,255,0.5)', textAlign: 'center', maxWidth: '650px', margin: '0 auto 50px', padding: '0 10px' }}>
           Imagine watching AI build a civilization. Every decision manifests in the world.
@@ -995,25 +1080,25 @@ function LandingPage({ onEnter, onDocs }) {
               background: item.highlight
                 ? 'linear-gradient(135deg, rgba(26, 31, 46, 0.9) 0%, rgba(20, 25, 35, 0.9) 100%)'
                 : 'linear-gradient(135deg, rgba(26, 31, 46, 0.8) 0%, rgba(20, 25, 35, 0.8) 100%)',
-              border: item.highlight ? '1px solid rgba(125, 211, 160, 0.15)' : '1px solid rgba(255,255,255,0.05)',
+              border: item.highlight ? '1px solid rgba(193, 95, 60, 0.15)' : '1px solid rgba(255,255,255,0.05)',
               borderRadius: '10px',
               padding: '24px',
-              boxShadow: item.highlight ? '0 0 30px rgba(125, 211, 160, 0.1)' : 'none',
-              animation: item.highlight ? 'cardGlowGreen 3s ease-in-out infinite' : 'none',
+              boxShadow: item.highlight ? '0 0 30px rgba(193, 95, 60, 0.1)' : 'none',
+              animation: item.highlight ? 'cardGlow 3s ease-in-out infinite' : 'none',
             }}>
               <div style={{
                 width: '32px',
                 height: '32px',
                 borderRadius: '50%',
-                background: 'rgba(125, 211, 160, 0.12)',
-                color: '#7dd3a0',
+                background: 'rgba(193, 95, 60, 0.12)',
+                color: '#C15F3C',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
                 fontSize: '13px',
                 fontWeight: '600',
                 marginBottom: '14px',
-                animation: `iconGlow 3s ease-in-out ${i * 0.4}s infinite`,
+                animation: `iconGlowOrange 3s ease-in-out ${i * 0.4}s infinite`,
               }}>{item.num}</div>
               <h3 style={{ fontSize: '15px', fontWeight: '600', marginBottom: '10px' }}>{item.title}</h3>
               <p style={{ fontSize: '12px', color: 'rgba(255,255,255,0.5)', lineHeight: '1.6' }}>{item.desc}</p>
@@ -1026,8 +1111,8 @@ function LandingPage({ onEnter, onDocs }) {
       <section className="landing-section" style={{ padding: '50px 60px', textAlign: 'center', position: 'relative', zIndex: 1 }}>
         <h2 style={{ fontSize: 'clamp(24px, 3vw, 36px)', fontWeight: '600', marginBottom: '20px' }}>
           Ready to see AI <span style={{
-            color: '#e8a754',
-            textShadow: '0 0 20px rgba(232, 167, 84, 0.3)',
+            color: '#C15F3C',
+            textShadow: '0 0 20px rgba(193, 95, 60, 0.3)',
             animation: 'glowPulse 2.5s ease-in-out infinite',
           }}>think</span>?
         </h2>
@@ -1035,9 +1120,6 @@ function LandingPage({ onEnter, onDocs }) {
           Enter World
         </VoxelButton>
       </section>
-
-      {/* Token CA Section */}
-      <TokenSection />
 
       {/* Footer */}
       <footer className="landing-footer" style={{
@@ -1088,10 +1170,10 @@ function LandingPage({ onEnter, onDocs }) {
         }
         @keyframes glowPulse {
           0%, 100% {
-            text-shadow: 0 0 20px rgba(232, 167, 84, 0.3);
+            text-shadow: 0 0 20px rgba(193, 95, 60, 0.3);
           }
           50% {
-            text-shadow: 0 0 40px rgba(232, 167, 84, 0.6), 0 0 60px rgba(232, 167, 84, 0.3);
+            text-shadow: 0 0 40px rgba(193, 95, 60, 0.6), 0 0 60px rgba(193, 95, 60, 0.3);
           }
         }
         @keyframes glowPulseGreen {
@@ -1124,10 +1206,10 @@ function LandingPage({ onEnter, onDocs }) {
         }
         @keyframes cardGlow {
           0%, 100% {
-            box-shadow: 0 0 15px rgba(232, 167, 84, 0.1);
+            box-shadow: 0 0 15px rgba(193, 95, 60, 0.1);
           }
           50% {
-            box-shadow: 0 0 25px rgba(232, 167, 84, 0.2);
+            box-shadow: 0 0 25px rgba(193, 95, 60, 0.2);
           }
         }
         @keyframes cardGlowGreen {
@@ -1146,6 +1228,24 @@ function LandingPage({ onEnter, onDocs }) {
             box-shadow: 0 0 20px rgba(125, 211, 160, 0.4);
           }
         }
+        @keyframes iconGlowOrange {
+          0%, 100% {
+            box-shadow: 0 0 10px rgba(193, 95, 60, 0.2);
+          }
+          50% {
+            box-shadow: 0 0 20px rgba(193, 95, 60, 0.4);
+          }
+        }
+        @keyframes lineGlowOrange {
+          0%, 100% {
+            opacity: 0.3;
+            box-shadow: 0 0 10px rgba(193, 95, 60, 0.2);
+          }
+          50% {
+            opacity: 0.6;
+            box-shadow: 0 0 20px rgba(193, 95, 60, 0.4);
+          }
+        }
         html {
           scroll-behavior: smooth;
         }
@@ -1159,7 +1259,7 @@ function LandingPage({ onEnter, onDocs }) {
             display: none !important;
           }
           .landing-nav-logo {
-            font-size: 18px !important;
+            height: 28px !important;
           }
           .landing-section {
             padding: 40px 20px !important;

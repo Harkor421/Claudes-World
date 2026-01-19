@@ -960,7 +960,7 @@ function DocsPage({ onBack }) {
               width: '32px',
               height: '32px',
               borderRadius: '8px',
-              background: 'linear-gradient(135deg, #e8a754 0%, #d4943d 100%)',
+              background: 'linear-gradient(135deg, #C15F3C 0%, #d4943d 100%)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
@@ -1034,7 +1034,7 @@ function DocsPage({ onBack }) {
                 alignItems: 'center',
                 gap: '8px',
               }}>
-                <span style={{ color: '#e8a754' }}>{section.icon}</span>
+                <span style={{ color: '#C15F3C' }}>{section.icon}</span>
                 {section.title.toUpperCase()}
               </div>
               {section.subsections.map((sub) => (
@@ -1044,9 +1044,9 @@ function DocsPage({ onBack }) {
                   style={{
                     width: '100%',
                     padding: '10px 20px 10px 40px',
-                    background: activeSection === sub.id ? 'rgba(232, 167, 84, 0.1)' : 'transparent',
+                    background: activeSection === sub.id ? 'rgba(193, 95, 60, 0.1)' : 'transparent',
                     border: 'none',
-                    borderLeft: activeSection === sub.id ? '2px solid #e8a754' : '2px solid transparent',
+                    borderLeft: activeSection === sub.id ? '2px solid #C15F3C' : '2px solid transparent',
                     color: activeSection === sub.id ? '#fff' : 'rgba(255,255,255,0.6)',
                     fontSize: '13px',
                     textAlign: 'left',
@@ -1140,7 +1140,7 @@ function DocsPage({ onBack }) {
         }}>
           <span>Docs</span>
           <span>/</span>
-          <span style={{ color: '#e8a754' }}>{currentContent.title}</span>
+          <span style={{ color: '#C15F3C' }}>{currentContent.title}</span>
         </div>
 
         {/* Title */}
@@ -1200,10 +1200,10 @@ function DocsPage({ onBack }) {
               onClick={() => setActiveSection(getNextSection(activeSection))}
               style={{
                 padding: '12px 20px',
-                background: 'rgba(232, 167, 84, 0.1)',
-                border: '1px solid rgba(232, 167, 84, 0.2)',
+                background: 'rgba(193, 95, 60, 0.1)',
+                border: '1px solid rgba(193, 95, 60, 0.2)',
                 borderRadius: '8px',
-                color: '#e8a754',
+                color: '#C15F3C',
                 fontSize: '13px',
                 cursor: 'pointer',
                 display: 'flex',
@@ -1231,7 +1231,7 @@ function DocsPage({ onBack }) {
         .docs-content h3 {
           font-size: 17px;
           font-weight: 600;
-          color: #e8a754;
+          color: #C15F3C;
           margin: 28px 0 12px 0;
         }
 
@@ -1245,8 +1245,8 @@ function DocsPage({ onBack }) {
         }
 
         .docs-content code {
-          background: rgba(232, 167, 84, 0.1);
-          color: #e8a754;
+          background: rgba(193, 95, 60, 0.1);
+          color: #C15F3C;
           padding: 2px 6px;
           border-radius: 4px;
           font-family: 'Monaco', 'Menlo', monospace;
@@ -1287,8 +1287,8 @@ function DocsPage({ onBack }) {
         }
 
         .docs-content th {
-          background: rgba(232, 167, 84, 0.1);
-          color: #e8a754;
+          background: rgba(193, 95, 60, 0.1);
+          color: #C15F3C;
           padding: 12px 16px;
           text-align: left;
           font-weight: 600;
@@ -1306,7 +1306,7 @@ function DocsPage({ onBack }) {
         }
 
         .docs-content blockquote {
-          border-left: 3px solid #e8a754;
+          border-left: 3px solid #C15F3C;
           padding-left: 16px;
           margin: 20px 0;
           color: rgba(255, 255, 255, 0.6);
