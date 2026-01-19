@@ -1,6 +1,5 @@
 import React, { useState } from 'react'
 import { useGameStore } from '../store/gameStore'
-import { gameSocket } from '../services/socket'
 
 // Format time as 12-hour clock
 const formatTime = (time) => {
@@ -41,16 +40,12 @@ function HUD({ onHome }) {
   const timeOfDay = useGameStore((state) => state.timeOfDay)
   const day = useGameStore((state) => state.day)
   const placedBuildings = useGameStore((state) => state.placedBuildings)
-  const aiSpeed = useGameStore((state) => state.aiSpeed)
-  const setAISpeed = useGameStore((state) => state.setAISpeed)
-  const resetWorld = useGameStore((state) => state.resetWorld)
   const logbook = useGameStore((state) => state.logbook)
 
   // Get latest entry for current state
   const latestEntry = logbook[logbook.length - 1]
   const citySize = latestEntry?.citySize || 'tiny'
   const population = latestEntry?.population || 0
-  const neighborhoods = latestEntry?.neighborhoods || 0
   const mood = latestEntry?.mood || 'optimistic'
 
   // Mood emoji mapping
@@ -62,20 +57,6 @@ function HUD({ onHome }) {
     philosophical: { emoji: ':o', color: '#7dd3fc' },
   }
   const moodInfo = moodEmojis[mood] || moodEmojis.optimistic
-
-  const handleSpeedChange = (e) => {
-    const newSpeed = parseFloat(e.target.value)
-    setAISpeed(newSpeed)
-    gameSocket.send('SET_SPEED', { speed: newSpeed })
-  }
-
-  const handleReset = () => {
-    resetWorld()
-    fetch('https://claudesworldback-production.up.railway.app/reset', { method: 'POST' })
-      .then(res => res.json())
-      .then(data => console.log('World reset:', data))
-      .catch(err => console.error('Reset failed:', err))
-  }
 
   // Shared styles
   const panelStyle = {
@@ -196,65 +177,6 @@ function HUD({ onHome }) {
             {moodInfo.emoji}
           </div>
         </div>
-      </div>
-
-      {/* Bottom Left - Speed Control */}
-      <div className="hud-speed-control" style={{
-        position: 'fixed',
-        bottom: '16px',
-        left: '16px',
-        zIndex: 100,
-        ...panelStyle,
-        padding: '12px 16px',
-        display: 'flex',
-        alignItems: 'center',
-        gap: '12px',
-        fontFamily: 'system-ui, -apple-system, sans-serif',
-      }}>
-        <span style={{ fontSize: '10px', color: 'rgba(255,255,255,0.4)', letterSpacing: '1px' }}>SPEED</span>
-        <input
-          type="range"
-          min="0.5"
-          max="10"
-          step="0.5"
-          value={aiSpeed}
-          onChange={handleSpeedChange}
-          style={{
-            width: '80px',
-            height: '4px',
-            appearance: 'none',
-            background: 'rgba(255, 255, 255, 0.15)',
-            borderRadius: '2px',
-            outline: 'none',
-            cursor: 'pointer',
-          }}
-        />
-        <span style={{ fontSize: '14px', color: '#7dd3a0', fontWeight: '600', minWidth: '32px' }}>{aiSpeed}x</span>
-
-        <div style={{ width: '1px', height: '20px', background: 'rgba(255,255,255,0.1)', marginLeft: '4px' }} />
-
-        <button
-          onClick={handleReset}
-          style={{
-            background: 'rgba(224, 108, 117, 0.2)',
-            border: '1px solid rgba(224, 108, 117, 0.3)',
-            borderRadius: '6px',
-            padding: '6px 12px',
-            color: '#e06c75',
-            fontSize: '11px',
-            fontWeight: '500',
-            cursor: 'pointer',
-            transition: 'all 0.2s',
-          }}
-          onMouseEnter={(e) => {
-            e.target.style.background = 'rgba(224, 108, 117, 0.3)'
-          }}
-          onMouseLeave={(e) => {
-            e.target.style.background = 'rgba(224, 108, 117, 0.2)'
-          }}
-        >
-          Reset
-        </button>
       </div>
 
       {/* Bottom Center - Controls Hint */}
