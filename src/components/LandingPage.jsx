@@ -469,7 +469,7 @@ function TokenSection() {
 function HeroTokenSection() {
   const [copied, setCopied] = useState(false)
 
-  const contractAddress = "xMsYjG92MRPGcPFAZ5bLZgZ6kvaLvgJdZkQHhExypump"
+  const contractAddress = "MsYjG92MRPGcPFAZ5bLZgZ6kvaLvgJdZkQHhExypump"
 
   const handleCopy = async () => {
     try {
