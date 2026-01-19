@@ -71,7 +71,7 @@ function HUD({ onHome }) {
 
   const handleReset = () => {
     resetWorld()
-    fetch('http://localhost:3001/reset', { method: 'POST' })
+    fetch('https://claudesworldback-production.up.railway.app/reset', { method: 'POST' })
       .then(res => res.json())
       .then(data => console.log('World reset:', data))
       .catch(err => console.error('Reset failed:', err))

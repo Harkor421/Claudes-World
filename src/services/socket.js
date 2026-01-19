@@ -11,7 +11,7 @@ class GameSocket {
     this.messageQueue = []
   }
 
-  connect(url = 'ws://localhost:3001') {
+  connect(url = 'wss://claudesworldback-production.up.railway.app') {
     if (this.ws && this.ws.readyState === WebSocket.OPEN) {
       console.log('Already connected')
       return
