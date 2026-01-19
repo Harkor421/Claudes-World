@@ -179,22 +179,6 @@ function HUD({ onHome }) {
         </div>
       </div>
 
-      {/* Bottom Center - Controls Hint */}
-      <div className="hud-controls-hint" style={{
-        position: 'fixed',
-        bottom: '16px',
-        left: '50%',
-        transform: 'translateX(-50%)',
-        zIndex: 100,
-        ...panelStyle,
-        padding: '8px 16px',
-        fontSize: '11px',
-        color: 'rgba(255, 255, 255, 0.4)',
-        letterSpacing: '0.5px',
-      }}>
-        WASD to move • Click to walk • Scroll to zoom
-      </div>
-
       {/* Right Side - Claude's Logbook */}
       <div className="hud-logbook" style={{
         position: 'fixed',
@@ -405,14 +389,6 @@ function HUD({ onHome }) {
             top: auto !important;
             bottom: 70px !important;
             max-height: 50vh !important;
-          }
-          .hud-speed-control {
-            bottom: 10px !important;
-            left: 10px !important;
-            padding: 8px 12px !important;
-          }
-          .hud-controls-hint {
-            display: none !important;
           }
         }
 

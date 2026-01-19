@@ -469,7 +469,7 @@ function TokenSection() {
 function HeroTokenSection() {
   const [copied, setCopied] = useState(false)
 
-  const contractAddress = "YOUR_CONTRACT_ADDRESS_HERE"
+  const contractAddress = "TBA"
 
   const handleCopy = async () => {
     try {
@@ -634,7 +634,7 @@ function LandingPage({ onEnter, onDocs }) {
           alt="Claude's World"
           className="landing-nav-logo"
           style={{
-            height: '36px',
+            height: '54px',
             width: 'auto',
           }}
         />
@@ -1259,7 +1259,7 @@ function LandingPage({ onEnter, onDocs }) {
             display: none !important;
           }
           .landing-nav-logo {
-            height: 28px !important;
+            height: 42px !important;
           }
           .landing-section {
             padding: 40px 20px !important;
