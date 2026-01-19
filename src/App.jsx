@@ -4,22 +4,32 @@ import Game from './components/Game'
 import HUD from './components/HUD'
 import AIController from './components/AIController'
 import LandingPage from './components/LandingPage'
+import DocsPage from './components/DocsPage'
 
 function App() {
-  const [showLanding, setShowLanding] = useState(true)
+  const [currentPage, setCurrentPage] = useState('landing') // 'landing', 'game', 'docs'
 
   // Add/remove game-active class on html element to control overflow
   useEffect(() => {
-    if (showLanding) {
-      document.documentElement.classList.remove('game-active')
-    } else {
+    if (currentPage === 'game') {
       document.documentElement.classList.add('game-active')
+    } else {
+      document.documentElement.classList.remove('game-active')
     }
     return () => document.documentElement.classList.remove('game-active')
-  }, [showLanding])
+  }, [currentPage])
 
-  if (showLanding) {
-    return <LandingPage onEnter={() => setShowLanding(false)} />
+  if (currentPage === 'docs') {
+    return <DocsPage onBack={() => setCurrentPage('landing')} />
+  }
+
+  if (currentPage === 'landing') {
+    return (
+      <LandingPage
+        onEnter={() => setCurrentPage('game')}
+        onDocs={() => setCurrentPage('docs')}
+      />
+    )
   }
 
   return (
@@ -36,7 +46,7 @@ function App() {
       >
         <Game />
       </Canvas>
-      <HUD onHome={() => setShowLanding(true)} />
+      <HUD onHome={() => setCurrentPage('landing')} />
       <AIController />
     </>
   )
