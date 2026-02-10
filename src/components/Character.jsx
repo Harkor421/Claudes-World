@@ -526,7 +526,6 @@ function FallbackCharacter() {
   const setCharacterPosition = useGameStore((state) => state.setCharacterPosition)
   const targetPosition = useGameStore((state) => state.characterTargetPosition)
   const clearTargetPosition = useGameStore((state) => state.clearTargetPosition)
-  const keysPressed = useGameStore((state) => state.keysPressed)
   const setIsMoving = useGameStore((state) => state.setIsMoving)
 
   const moveSpeed = 0.06
@@ -539,21 +538,7 @@ function FallbackCharacter() {
     let moving = false
     let targetDir = new THREE.Vector3()
 
-    const moveDir = new THREE.Vector3()
-    const forwardDir = new THREE.Vector3(-1, 0, -1).normalize()
-    const rightDir = new THREE.Vector3(1, 0, -1).normalize()
-
-    if (keysPressed.forward) { moveDir.add(forwardDir); moving = true }
-    if (keysPressed.backward) { moveDir.sub(forwardDir); moving = true }
-    if (keysPressed.left) { moveDir.sub(rightDir); moving = true }
-    if (keysPressed.right) { moveDir.add(rightDir); moving = true }
-
-    if (moving && moveDir.length() > 0) {
-      moveDir.normalize()
-      currentPos.add(moveDir.multiplyScalar(moveSpeed))
-      targetDir = moveDir.clone()
-      clearTargetPosition()
-    } else if (targetPosition) {
+    if (targetPosition) {
       const target = new THREE.Vector3(...targetPosition)
       const direction = target.clone().sub(currentPos)
       const distance = direction.length()

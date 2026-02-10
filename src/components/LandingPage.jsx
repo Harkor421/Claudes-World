@@ -349,201 +349,6 @@ function NavButton({ onClick, children }) {
   )
 }
 
-// Token CA Section with copy functionality
-function TokenSection() {
-  const [copied, setCopied] = useState(false)
-  const [isHovered, setIsHovered] = useState(false)
-
-  // Placeholder CA - replace with actual contract address
-  const contractAddress = "TBA"
-
-  const handleCopy = async () => {
-    try {
-      await navigator.clipboard.writeText(contractAddress)
-      setCopied(true)
-      setTimeout(() => setCopied(false), 2000)
-    } catch (err) {
-      console.error('Failed to copy:', err)
-    }
-  }
-
-  // Truncate address for display
-  const displayAddress = contractAddress.length > 20
-    ? `${contractAddress.slice(0, 8)}...${contractAddress.slice(-8)}`
-    : contractAddress
-
-  return (
-    <section className="landing-section" style={{
-      padding: '40px 60px',
-      position: 'relative',
-      zIndex: 1,
-      display: 'flex',
-      justifyContent: 'center',
-    }}>
-      <div className="token-section-card" style={{
-        display: 'flex',
-        alignItems: 'center',
-        gap: '16px',
-        padding: '16px 24px',
-        background: 'rgba(193, 95, 60, 0.03)',
-        border: '1px solid rgba(193, 95, 60, 0.1)',
-        borderRadius: '12px',
-        maxWidth: '500px',
-        width: '100%',
-      }}>
-        {/* CA Label */}
-        <div style={{
-          fontSize: '11px',
-          fontWeight: '600',
-          color: '#C15F3C',
-          letterSpacing: '1.5px',
-          textTransform: 'uppercase',
-        }}>
-          CA
-        </div>
-
-        {/* Divider */}
-        <div className="token-divider" style={{
-          width: '1px',
-          height: '20px',
-          background: 'rgba(193, 95, 60, 0.2)',
-        }} />
-
-        {/* Address */}
-        <div style={{
-          fontFamily: "'SF Mono', 'Fira Code', 'Monaco', monospace",
-          fontSize: '13px',
-          color: 'rgba(255, 255, 255, 0.7)',
-          letterSpacing: '0.5px',
-          flex: 1,
-        }}>
-          {displayAddress}
-        </div>
-
-        {/* Copy Button */}
-        <button
-          onClick={handleCopy}
-          onMouseEnter={() => setIsHovered(true)}
-          onMouseLeave={() => setIsHovered(false)}
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '6px',
-            padding: '8px 14px',
-            background: copied
-              ? 'rgba(125, 211, 160, 0.15)'
-              : isHovered
-                ? 'rgba(193, 95, 60, 0.15)'
-                : 'rgba(193, 95, 60, 0.08)',
-            border: `1px solid ${copied ? 'rgba(125, 211, 160, 0.3)' : 'rgba(193, 95, 60, 0.2)'}`,
-            borderRadius: '6px',
-            color: copied ? '#7dd3a0' : '#C15F3C',
-            fontSize: '12px',
-            fontWeight: '500',
-            cursor: 'pointer',
-            transition: 'all 0.2s ease',
-            transform: isHovered && !copied ? 'scale(1.02)' : 'scale(1)',
-          }}
-        >
-          {copied ? (
-            <>
-              <span style={{ fontSize: '14px' }}>&#10003;</span>
-              Copied
-            </>
-          ) : (
-            <>
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
-                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
-              </svg>
-              Copy
-            </>
-          )}
-        </button>
-      </div>
-    </section>
-  )
-}
-
-// Cleaner inline CA for hero section
-function HeroTokenSection() {
-  const [copied, setCopied] = useState(false)
-
-  const contractAddress = "MsYjG92MRPGcPFAZ5bLZgZ6kvaLvgJdZkQHhExypump"
-
-  const handleCopy = async () => {
-    try {
-      await navigator.clipboard.writeText(contractAddress)
-      setCopied(true)
-      setTimeout(() => setCopied(false), 2000)
-    } catch (err) {
-      console.error('Failed to copy:', err)
-    }
-  }
-
-  const displayAddress = contractAddress.length > 20
-    ? `${contractAddress.slice(0, 6)}...${contractAddress.slice(-4)}`
-    : contractAddress
-
-  return (
-    <div className="hero-ca-section" style={{
-      display: 'flex',
-      alignItems: 'center',
-      gap: '12px',
-      marginBottom: '60px',
-      padding: '10px 16px',
-      background: 'rgba(255, 255, 255, 0.03)',
-      border: '1px solid rgba(255, 255, 255, 0.06)',
-      borderRadius: '8px',
-    }}>
-      <span style={{
-        fontSize: '10px',
-        fontWeight: '600',
-        color: 'rgba(255, 255, 255, 0.4)',
-        letterSpacing: '1px',
-      }}>
-        CA
-      </span>
-      <span style={{
-        fontFamily: "'SF Mono', 'Fira Code', monospace",
-        fontSize: '12px',
-        color: 'rgba(255, 255, 255, 0.6)',
-        letterSpacing: '0.3px',
-      }}>
-        {displayAddress}
-      </span>
-      <button
-        onClick={handleCopy}
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: '4px',
-          padding: '4px 10px',
-          background: copied ? 'rgba(125, 211, 160, 0.1)' : 'transparent',
-          border: `1px solid ${copied ? 'rgba(125, 211, 160, 0.3)' : 'rgba(255, 255, 255, 0.1)'}`,
-          borderRadius: '4px',
-          color: copied ? '#7dd3a0' : 'rgba(255, 255, 255, 0.5)',
-          fontSize: '11px',
-          cursor: 'pointer',
-          transition: 'all 0.2s ease',
-        }}
-      >
-        {copied ? (
-          <span>Copied</span>
-        ) : (
-          <>
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
-              <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
-            </svg>
-            <span>Copy</span>
-          </>
-        )}
-      </button>
-    </div>
-  )
-}
-
 function LandingPage({ onEnter, onDocs }) {
   const [isTransitioning, setIsTransitioning] = useState(false)
 
@@ -683,7 +488,7 @@ function LandingPage({ onEnter, onDocs }) {
         }}>
           One city. One mind. Every decision visible.
         </p>
-        <div className="landing-hero-buttons" style={{ display: 'flex', gap: '12px', marginBottom: '24px' }}>
+        <div className="landing-hero-buttons" style={{ display: 'flex', gap: '12px', marginBottom: '40px' }}>
           <VoxelButton onClick={handleEnter} primary>
             Enter Simulation
           </VoxelButton>
@@ -699,9 +504,6 @@ function LandingPage({ onEnter, onDocs }) {
             </span>
           </VoxelButton>
         </div>
-
-        {/* Inline CA Section */}
-        <HeroTokenSection />
 
         <div style={{
           position: 'absolute',
@@ -1289,14 +1091,6 @@ function LandingPage({ onEnter, onDocs }) {
           }
           .landing-problem-flex {
             flex-direction: column !important;
-          }
-          .token-section-card {
-            flex-direction: column !important;
-            gap: 12px !important;
-            text-align: center !important;
-          }
-          .token-divider {
-            display: none !important;
           }
           .landing-footer {
             padding: 30px 20px !important;

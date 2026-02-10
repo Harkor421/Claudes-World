@@ -7,14 +7,6 @@ export const useGameStore = create((set, get) => ({
   characterRotation: 0,
   isMoving: false,
 
-  // Movement keys pressed
-  keysPressed: {
-    forward: false,
-    backward: false,
-    left: false,
-    right: false
-  },
-
   // Time system
   timeOfDay: 6, // 0-24 hours (start at dawn)
   autoTimeEnabled: true, // auto-advance time (enabled by default)
@@ -56,10 +48,6 @@ export const useGameStore = create((set, get) => ({
   setCharacterTargetPosition: (position) => set({ characterTargetPosition: position }),
   setCharacterRotation: (rotation) => set({ characterRotation: rotation }),
   setIsMoving: (moving) => set({ isMoving: moving }),
-
-  setKeyPressed: (key, pressed) => set((state) => ({
-    keysPressed: { ...state.keysPressed, [key]: pressed }
-  })),
 
   clearTargetPosition: () => set({ characterTargetPosition: null }),
 
